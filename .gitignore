@@ -1,0 +1,7 @@
+# created by virtualenv automatically
+.idea/
+include/
+Lib/
+Scripts/
+src/miami.log
+pyvenv.cfg
