@@ -11,6 +11,7 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
+from utils.cameraModel import CameraGroup
 
 logger = logging.getLogger("miami")
 logging.basicConfig(format=LogConfig().LOG_FORMAT,
@@ -43,11 +44,12 @@ logging.basicConfig(format=LogConfig().LOG_FORMAT,
 #             all_sprites.add(new_enemy)
 #             logger.info(new_enemy)
 
-
+# TODO write unit tests where applicable
 # TODO implement death scenario
 # TODO implement player attack
+# TODO implement spawns and mob variety
 # TODO implement mob loot and scoring
-# TODO implement camera functionality and scrollable background (infinitely generated background)
+# TODO implement scrollable background (infinitely generated background)
 # TODO implement HUD
 # TODO implement graphics
 # TODO implement sounds
@@ -61,7 +63,7 @@ def main():
     pygame.init()
 
     # Create the game window
-    screen = pygame.display.set_mode((Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT))
+    screen = pygame.display.set_mode(Settings.RESOLUTION)
     pygame.display.set_caption(Settings.PROJECT_NAME)
 
     # Create player character
@@ -83,7 +85,7 @@ def main():
     enemies_group.add(enemies)  # Add the enemies to the group
 
     # Create a combined group for rendering
-    all_sprites = pygame.sprite.Group()
+    all_sprites = CameraGroup()
     all_sprites.add(player)
     all_sprites.add(enemies)
 
@@ -141,8 +143,7 @@ def main():
         ########
 
         # Update the combined sprite group for rendering
-        # all_sprites.update()
-        all_sprites.draw(screen)
+        all_sprites.custom_draw(player)
 
         if Settings.ENABLE_ON_SCREEN_LOGS:
             # Set the background color of the text pane surface
@@ -158,10 +159,10 @@ def main():
                 # Blit the text pane surface onto the screen
             screen.blit(screen_logs.text_pane_surface, (screen_logs.text_pane_rect.x, screen_logs.text_pane_rect.y))
 
-        # Create a text surface for displaying FPS
-        fps_surface = screen_logs.log_font.render(f"FPS: {current_fps}", True, screen_logs.log_text_color)
-        # Display the FPS text on the screen
-        screen.blit(fps_surface, (5, 5))  # Adjust the position as needed
+            # Create a text surface for displaying FPS
+            fps_surface = screen_logs.log_font.render(f"FPS: {current_fps}", True, screen_logs.log_text_color)
+            # Display the FPS text on the screen
+            screen.blit(fps_surface, (5, 5))  # Adjust the position as needed
 
         pygame.display.flip()
         clock.tick(Settings.FPS)

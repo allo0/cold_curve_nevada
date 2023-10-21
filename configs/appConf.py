@@ -12,6 +12,8 @@ class Settings:
     # Define constants for the game_screen width and height
     SCREEN_WIDTH = pyautogui.size().width / 2
     SCREEN_HEIGHT = pyautogui.size().height / 2
+    RESOLUTION = (SCREEN_WIDTH, SCREEN_HEIGHT)
+
     FPS = 60
 
     # API_URL = "http://127.0.0.1:8000"
