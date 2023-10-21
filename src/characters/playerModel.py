@@ -1,7 +1,6 @@
 import logging
 
 import pygame
-from configs.appConf import Settings
 from configs.entitiesConf import PLAYER_CONFIG
 from src.characters.characterModel import Character
 
@@ -49,15 +48,17 @@ class Player(Character):
         if keys[pygame.K_s]:
             self.rect.y += self.speed
 
-        # Keep player on the game_screen
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > Settings.SCREEN_WIDTH:
-            self.rect.right = Settings.SCREEN_WIDTH
-        if self.rect.top <= 0:
-            self.rect.top = 0
-        if self.rect.bottom >= Settings.SCREEN_HEIGHT:
-            self.rect.bottom = Settings.SCREEN_HEIGHT
+        ####### This is deprecated since implemented the camera #######
+        # # Keep player on the game_screen
+
+        # if self.rect.left < 0:
+        #     self.rect.left = 0
+        # if self.rect.right > Settings.SCREEN_WIDTH:
+        #     self.rect.right = Settings.SCREEN_WIDTH
+        # if self.rect.top <= 0:
+        #     self.rect.top = 0
+        # if self.rect.bottom >= Settings.SCREEN_HEIGHT:
+        #     self.rect.bottom = Settings.SCREEN_HEIGHT
 
         # Add more logic for shooting, health management, etc.
 
