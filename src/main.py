@@ -1,5 +1,4 @@
 import logging
-import random
 
 import pygame
 from characters.generEnemyModel import Enemy
@@ -11,6 +10,7 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
+from utils.backgroundModel import BackgroundGenerator
 from utils.cameraModel import CameraGroup
 
 logger = logging.getLogger("miami")
@@ -49,7 +49,7 @@ logging.basicConfig(format=LogConfig().LOG_FORMAT,
 # TODO implement player attack
 # TODO implement spawns and mob variety
 # TODO implement mob loot and scoring
-# TODO implement scrollable background (infinitely generated background)
+# TODO implement create a randomly generated map (with walls and collision etc) each time (but somewhat big to show the camera functionality)
 # TODO implement HUD
 # TODO implement graphics
 # TODO implement sounds
@@ -69,12 +69,14 @@ def main():
     # Create player character
     player = Player(Settings.SCREEN_WIDTH // 2, Settings.SCREEN_HEIGHT // 2)
 
+    # Create an instance of BackgroundGenerator
+    background = BackgroundGenerator()
+
     # Create enemy characters
     enemies = pygame.sprite.Group()
     # TODO create a fleshed out spawing mechanism
-    for _ in range(1):  # Create 5 enemy characters (you can adjust the number)
-        enemy = Enemy(Settings.SCREEN_WIDTH + random.randint(1, 300) // 4,
-                      Settings.SCREEN_HEIGHT + random.randint(1, 600) // 4)  # Initial positions (you can adjust)
+    for _ in range(5):  # Create 5 enemy characters (you can adjust the number)
+        enemy = Enemy()
         logger.info(f"Instanciated {enemy.id}")
         enemies.add(enemy)
 

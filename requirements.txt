@@ -1,2 +1,4 @@
 pygame==2.5.2
 pyautogui==0.9.54
+pytmx==3.32
+numpy==1.26.1

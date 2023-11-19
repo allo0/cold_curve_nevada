@@ -1,10 +1,14 @@
-from configs.entitiesConf import SIMPLE_ENEMY_CONFIG
+from random import choice
+
+from configs.entitiesConf import SIMPLE_ENEMY_CONFIG, MISC
 from src.characters.characterModel import Character
 
 
 class Enemy(Character):
-    def __init__(self, x, y):
-        super().__init__(x, y)
+    def __init__(self):
+        spawn_coordinates = choice(MISC["spawns"])
+
+        super().__init__(spawn_coordinates[0], spawn_coordinates[1])
 
         self.image.fill((255, 0, 255))
 
