@@ -1,8 +1,13 @@
 import logging
 
 import pygame
-from configs.entitiesConf import PLAYER_CONFIG
+
+from coldcurve_nevada.configs.entitiesConf import PLAYER_CONFIG
+from configs import logConf
 from src.characters.characterModel import Character
+from src.utils.networkModel import Network
+
+logger = logConf.logger
 
 
 # You can create different character classes for the player and enemies and add specific behaviors.
@@ -13,7 +18,7 @@ class Player(Character):
         super().__init__(x, y)
         # Access the global logger object from main.py
         self.logger = logging.getLogger("miami")
-        self.logger.debug(f"Player {self.id} initialized")
+        self.logger.info(f"Player {self.id} initialized")
 
         self.image.fill((255, 255, 0))
 
@@ -24,6 +29,27 @@ class Player(Character):
         # Cooldown for hit
         self.hit_cooldown = 0  # Initialize the cooldown timer
         self.hit_cooldown_duration = PLAYER_CONFIG["iframes"]  # Adjust this value as needed (in frames)
+        # New attributes for multiplayer
+        self.multiplayer = None
+        self.network = None
+
+    def set_network(self, player_index):
+        self.network = Network(self, init_network=self.multiplayer, player_index=player_index)
+        return self.network
+
+    def get_network(self):
+        return self.network
+
+    def set_multiplayer(self, multiplayer):
+        self.multiplayer = multiplayer
+
+    def init_network(self):
+        if self.multiplayer and self.network:
+            self.set_initial_position()  # Set the initial position on the server
+
+    def set_initial_position(self):
+        if self.network:
+            self.network.send({"id": self.id, "x": self.rect.x, "y": self.rect.y, "health": self.health})
 
     def update(self):
         super().update()
@@ -33,21 +59,31 @@ class Player(Character):
             self.image.set_alpha(128)  # Make the player semi-transparent during iframes
         else:
             self.image.set_alpha(255)  # Reset transparency
+            self.end_iframes()  # Call end_iframes when iframes are over
 
         if self.hit_cooldown > 0:
             self.hit_cooldown -= 1
 
         # Implement character movement and actions here
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            self.rect.x -= self.speed
-        if keys[pygame.K_d]:
-            self.rect.x += self.speed
-        if keys[pygame.K_w]:
-            self.rect.y -= self.speed
-        if keys[pygame.K_s]:
-            self.rect.y += self.speed
 
+        if not self.multiplayer:
+            # Single-player mode controls
+            if keys[pygame.K_a]:
+                self.rect.x -= self.speed
+            if keys[pygame.K_d]:
+                self.rect.x += self.speed
+            if keys[pygame.K_w]:
+                self.rect.y -= self.speed
+            if keys[pygame.K_s]:
+                self.rect.y += self.speed
+        else:
+            # Multiplayer mode controls
+            if self.network:
+                server_data = self.network.getP()
+                if server_data:
+                    self.rect.x = server_data.get("x", self.rect.x)
+                    self.rect.y = server_data.get("y", self.rect.y)
         ####### This is deprecated since implemented the camera #######
         # # Keep player on the game_screen
 
@@ -81,3 +117,20 @@ class Player(Character):
         # Called when iframes are over
         self.invincible = False
         self.was_hit = False  # Reset the flag for the next collision
+
+    def get_player_data(self):
+        return {
+            "id": self.id,
+            "x": self.rect.x,
+            "y": self.rect.y,
+            "health": self.health,
+            # Add any other relevant data you want to send
+        }
+
+    def update_from_data(self, data):
+        if data is not None:
+            self.id = data["id"]
+            self.rect.x = data["x"]
+            self.rect.y = data["y"]
+            self.health = data["health"]
+            # Update any other relevant data you received
