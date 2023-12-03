@@ -2,8 +2,7 @@ import uuid
 
 import pygame
 
-from coldcurve_nevada.configs.entitiesConf import GENERIC_CONFIG
-
+from cold_curve_nevada.configs.entitiesConf import GENERIC_CONFIG
 
 # Base class for all characters (NPC or not) for the game
 class Character(pygame.sprite.Sprite):

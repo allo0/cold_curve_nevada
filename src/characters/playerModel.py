@@ -2,10 +2,10 @@ import logging
 
 import pygame
 
-from coldcurve_nevada.configs.entitiesConf import PLAYER_CONFIG
-from configs import logConf
-from src.characters.characterModel import Character
-from src.utils.networkModel import Network
+from cold_curve_nevada.configs.entitiesConf import PLAYER_CONFIG
+from cold_curve_nevada.configs import logConf
+from cold_curve_nevada.src.characters.characterModel import Character
+from cold_curve_nevada.src.utils.networkModel import Network
 
 logger = logConf.logger
 

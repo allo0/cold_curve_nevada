@@ -5,11 +5,11 @@ from pygame.locals import (
     QUIT,
 )
 
-from configs import logConf
-from configs.appConf import Settings
-from configs.screenLogConf import ScreenLog
-from src.characters.generEnemyModel import Enemy
-from src.utils.cameraModel import CameraGroup
+from cold_curve_nevada.configs import logConf
+from cold_curve_nevada.configs.appConf import Settings
+from cold_curve_nevada.configs.screenLogConf import ScreenLog
+from cold_curve_nevada.src.characters.generEnemyModel import Enemy
+from cold_curve_nevada.src.utils.cameraModel import CameraGroup
 
 
 class ColdCurveNevada():
@@ -50,10 +50,10 @@ class ColdCurveNevada():
         self.all_sprites = CameraGroup()
 
         self.enemies = pygame.sprite.Group()
-        # for _ in range(5):  # Create 5 enemy characters (you can adjust the number)
-        #     enemy = Enemy()
-        #     self.logger.info(f"Instantiated {enemy.id}")
-        #     self.enemies.add(enemy)
+        for _ in range(5):  # Create 5 enemy characters (you can adjust the number)
+            enemy = Enemy()
+            self.logger.info(f"Instantiated {enemy.id}")
+            self.enemies.add(enemy)
 
         # # Modify player instances for multiplayer
         # for player in self.players:
@@ -125,8 +125,8 @@ class ColdCurveNevada():
         # Add a player instance to the list
         self.players.append(player_instance)
         player_instance.set_multiplayer(self.multiplayer)
-        self.network = player_instance.set_network(player_index=self.player_index)  # You might want to adjust this based on your actual network setup
-        player_instance.init_network()  # Initialize network connection
+        self.network = player_instance.set_network(player_index=self.player_index)
+        # player_instance.init_network()  # Initialize network connection
         # self.network.send(player_data)
 
         self.player_group.add(player_instance)  # Add the player to the group

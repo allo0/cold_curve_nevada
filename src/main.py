@@ -1,6 +1,6 @@
 import sys
 
-from src.characters.playerModel import Player
+from cold_curve_nevada.src.characters.playerModel import Player
 from utils.ColdCurveNevadaModel import ColdCurveNevada
 
 # # Create a custom event for adding a new enemy
