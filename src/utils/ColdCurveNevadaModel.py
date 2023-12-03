@@ -6,6 +6,7 @@ from pygame.locals import (
 )
 
 from cold_curve_nevada.configs import logConf
+from cold_curve_nevada.configs.Events import (PLAYERDEATH)
 from cold_curve_nevada.configs.appConf import Settings
 from cold_curve_nevada.configs.screenLogConf import ScreenLog
 from cold_curve_nevada.src.characters.generEnemyModel import Enemy
@@ -14,7 +15,7 @@ from cold_curve_nevada.src.utils.cameraModel import CameraGroup
 
 class ColdCurveNevada():
 
-    def __init__(self, player_index) -> None:
+    def __init__(self,difficulty, player_index, multiplayer: False) -> None:
         super().__init__()
         pygame.init()  # Initialize Pygame
 
@@ -33,7 +34,7 @@ class ColdCurveNevada():
         # self.background = BackgroundGenerator()
 
         # Set if it is multiplayer or not
-        self.multiplayer = True  # TODO migrate it to appconfig
+        self.multiplayer = multiplayer
 
         # Create a Network instance for communication
         self.network = None
@@ -51,17 +52,9 @@ class ColdCurveNevada():
 
         self.enemies = pygame.sprite.Group()
         for _ in range(5):  # Create 5 enemy characters (you can adjust the number)
-            enemy = Enemy()
+            enemy = Enemy(difficulty)
             self.logger.info(f"Instantiated {enemy.id}")
             self.enemies.add(enemy)
-
-        # # Modify player instances for multiplayer
-        # for player in self.players:
-        #     player.set_multiplayer(self.multiplayer)
-        #     player.set_network(self.network)  # You might want to adjust this based on your actual network setup
-        #     player.init_network(player_index=player_index)  # Initialize network connection
-        #     self.player_group.add(player)  # Add the player to the group
-        #     self.all_sprites.add(player)
 
         self.enemies_group.add(self.enemies)  # Add the enemies to the group
         self.all_sprites.add(self.enemies)
@@ -76,6 +69,10 @@ class ColdCurveNevada():
                 if event.key == K_ESCAPE:
                     self.running = False
             elif event.type == QUIT:
+                self.running = False
+            elif event.type == PLAYERDEATH:
+                #Here will be a death screen or something
+                self.logger.info(event.custom_text)
                 self.running = False
 
     def update(self):
@@ -125,8 +122,8 @@ class ColdCurveNevada():
         # Add a player instance to the list
         self.players.append(player_instance)
         player_instance.set_multiplayer(self.multiplayer)
-        self.network = player_instance.set_network(player_instance=player_instance,player_index=self.player_index)
-        self.players[int(self.player_index)].update_from_data(player_instance.get_player_data())
+        self.network = player_instance.set_network(player_instance=player_instance, player_index=self.player_index)
+        # self.players[int(self.player_index)].update_from_data(player_instance.get_player_data())
         # player_instance.init_network()  # Initialize network connection
         # self.network.send(player_data)
 

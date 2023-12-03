@@ -3,6 +3,7 @@ import logging
 import pygame
 
 from cold_curve_nevada.configs import logConf
+from cold_curve_nevada.configs.Events import (PLAYERDEATH)
 from cold_curve_nevada.configs.entitiesConf import PLAYER_CONFIG
 from cold_curve_nevada.src.characters.characterModel import Character
 from cold_curve_nevada.src.utils.networkModel import Network
@@ -100,10 +101,13 @@ class Player(Character):
 
     def take_damage(self, damage):
         # Deduct health when the player takes damage
-        if not self.invincible and self.hit_cooldown == 0:
+        if not self.invincible and self.hit_cooldown == 0 and self.health > 0:
             self.health -= damage
             self.logger.debug(f"Current HP: {self.health}")
             self.hit()
+        elif self.health <= 0:
+            player_death_event = pygame.event.Event(PLAYERDEATH, custom_text='YA DEAD')
+            pygame.event.post(player_death_event)
 
     def hit(self):
         # Handle iframes only
