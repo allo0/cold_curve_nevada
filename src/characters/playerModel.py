@@ -2,8 +2,8 @@ import logging
 
 import pygame
 
-from cold_curve_nevada.configs.entitiesConf import PLAYER_CONFIG
 from cold_curve_nevada.configs import logConf
+from cold_curve_nevada.configs.entitiesConf import PLAYER_CONFIG
 from cold_curve_nevada.src.characters.characterModel import Character
 from cold_curve_nevada.src.utils.networkModel import Network
 
@@ -33,8 +33,8 @@ class Player(Character):
         self.multiplayer = None
         self.network = None
 
-    def set_network(self, player_index):
-        self.network = Network(self, init_network=self.multiplayer, player_index=player_index)
+    def set_network(self, player_instance, player_index):
+        self.network = Network(player=self, init_network=self.multiplayer, player_index=player_index)
         return self.network
 
     def get_network(self):
@@ -77,13 +77,13 @@ class Player(Character):
                 self.rect.y -= self.speed
             if keys[pygame.K_s]:
                 self.rect.y += self.speed
-        else:
-            # Multiplayer mode controls
-            if self.network:
-                server_data = self.network.getP()
-                if server_data:
-                    self.rect.x = server_data.get("x", self.rect.x)
-                    self.rect.y = server_data.get("y", self.rect.y)
+        # else:
+        #     # Multiplayer mode controls
+        #     if self.network:
+        #         server_data = self.network.getP()
+        #         if server_data:
+        #             self.rect.x = server_data.get("x", self.rect.x)
+        #             self.rect.y = server_data.get("y", self.rect.y)
         ####### This is deprecated since implemented the camera #######
         # # Keep player on the game_screen
 

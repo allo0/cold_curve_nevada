@@ -125,7 +125,8 @@ class ColdCurveNevada():
         # Add a player instance to the list
         self.players.append(player_instance)
         player_instance.set_multiplayer(self.multiplayer)
-        self.network = player_instance.set_network(player_index=self.player_index)
+        self.network = player_instance.set_network(player_instance=player_instance,player_index=self.player_index)
+        self.players[int(self.player_index)].update_from_data(player_instance.get_player_data())
         # player_instance.init_network()  # Initialize network connection
         # self.network.send(player_data)
 

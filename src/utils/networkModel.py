@@ -23,18 +23,18 @@ class Network:
         try:
             self.client.connect(self.addr)
             self.client.settimeout(5)  # Set a timeout of 5 seconds
-            # self.client.setblocking(True)
+            self.client.setblocking(True)
             # Send initial player data to the server
-            initial_data = player.get_player_data()
-            self.client.sendall(json.dumps(initial_data).encode('utf-8'))
-            logger.info(f"Sent initial data to server: {initial_data}")
+            # initial_data = player.get_player_datata()
+            # self.client.sendall(json.dumps(initial_data).encode('utf-8'))
+            # logger.info(f"Sent initial data to server: {initial_data}")
 
             # Receive initial data from the server
             initial_data_json = self.client.recv(2048).decode('utf-8')
             initial_data = json.loads(initial_data_json)
-            logger.info(f'Data received from the server: {initial_data_json} and in the json format"{initial_data}')
+            logger.info(f'Data received from the server: {initial_data}')
 
-            return initial_data
+            return self.client
         except socket.timeout as e:
             logger.warning(f"Connection timed out: {e}")
         except Exception as e:
@@ -64,7 +64,7 @@ class Network:
             data = self.client.recv(2048)
             logger.info("Received data from server: %s", data)
 
-            if data:
+            if not data:
                 # Receive acknowledgment or other response from the server if needed
                 response = self.client.recv(2048).decode('utf-8')
                 return response
