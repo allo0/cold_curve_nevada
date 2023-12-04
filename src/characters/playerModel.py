@@ -1,9 +1,10 @@
-import logging
-
 import pygame
 
 from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.Events import (PLAYERDEATH)
+from cold_curve_nevada.configs.Events import (
+    PLAYERDEATH,
+
+)
 from cold_curve_nevada.configs.entitiesConf import PLAYER_CONFIG
 from cold_curve_nevada.src.characters.characterModel import Character
 from cold_curve_nevada.src.utils.networkModel import Network
@@ -11,38 +12,99 @@ from cold_curve_nevada.src.utils.networkModel import Network
 logger = logConf.logger
 
 
-# You can create different character classes for the player and enemies and add specific behaviors.
 class Player(Character):
-    iframes = 60
 
     def __init__(self, x, y):
         super().__init__(x, y)
-        # Access the global logger object from main.py
-        self.logger = logging.getLogger("miami")
-        self.logger.info(f"Player {self.id} initialized")
+        logger.info(f"Player {self.id} initialized")
 
         self.image.fill((255, 255, 0))
 
-        self.speed = PLAYER_CONFIG["speed"]
-        self.health = PLAYER_CONFIG["health"]
-        self.iframes = 0  # Number of iframes after being hit (0 means not invulnerable)
-        self.invincible = False  # Flag to track if the player is currently invincible
-        # Cooldown for hit
-        self.hit_cooldown = 0  # Initialize the cooldown timer
-        self.hit_cooldown_duration = PLAYER_CONFIG["iframes"]  # Adjust this value as needed (in frames)
-        # New attributes for multiplayer
-        self.multiplayer = None
-        self.network = None
+        self.__speed = PLAYER_CONFIG["speed"]
+        self.__health = PLAYER_CONFIG["health"]
+        self.__damage = PLAYER_CONFIG["damage"]
+
+        self.__hit_cooldown_duration = PLAYER_CONFIG["iframes"]
+
+        self.__multiplayer = None
+        self.__network = None
+
+        # Inner class for semi-transparent area
+        class AoE_Zone(pygame.sprite.Sprite):
+            def __init__(self, player_rect):
+                super().__init__()
+                self.image = pygame.Surface((PLAYER_CONFIG["aoe_radius"] * 2, PLAYER_CONFIG["aoe_radius"] * 2),
+                                            pygame.SRCALPHA)
+                pygame.draw.circle(self.image, (255, 255, 255, 32),
+                                   (PLAYER_CONFIG["aoe_radius"], PLAYER_CONFIG["aoe_radius"]),
+                                   PLAYER_CONFIG["aoe_radius"])
+                self.rect = self.image.get_rect(center=player_rect.center)
+
+            def update(self, player_rect):
+                self.rect.center = player_rect.center
+
+        # Create an instance of the AoE_Zone class
+        self.__aoe_zone = AoE_Zone(self.rect)
+
+    @property
+    def speed(self):
+        return self.__speed
+
+    @speed.setter
+    def speed(self, value):
+        self.__speed = value
+
+    @property
+    def health(self):
+        return self.__health
+
+    @health.setter
+    def health(self, value):
+        self.__health = value
+
+    @property
+    def damage(self):
+        return self.__damage
+
+    @damage.setter
+    def damage(self, value):
+        self.__damage = value
+
+    @property
+    def hit_cooldown_duration(self):
+        return self.__hit_cooldown_duration
+
+    @hit_cooldown_duration.setter
+    def hit_cooldown_duration(self, value):
+        self.__hit_cooldown_duration = value
+
+    @property
+    def network(self):
+        return self.__network
+
+    @network.setter
+    def network(self, value):
+        self.__network = value
+
+    @property
+    def multiplayer(self):
+        return self.__multiplayer
+
+    @multiplayer.setter
+    def multiplayer(self, value):
+        self.__multiplayer = value
+
+    @property
+    def aoe_zone(self):
+        return self.__aoe_zone
+
+    @aoe_zone.setter
+    def aoe_zone(self, value):
+        self.__aoe_zone = value
 
     def set_network(self, player_instance, player_index):
         self.network = Network(player=self, init_network=self.multiplayer, player_index=player_index)
         return self.network
-
-    def get_network(self):
-        return self.network
-
-    def set_multiplayer(self, multiplayer):
-        self.multiplayer = multiplayer
 
     def init_network(self):
         if self.multiplayer and self.network:
@@ -52,18 +114,12 @@ class Player(Character):
         if self.network:
             self.network.send({"id": self.id, "x": self.rect.x, "y": self.rect.y, "health": self.health})
 
-    def update(self):
+    def update(self, enemies):
         super().update()
-        # TODO maybe migrate the iframes and hit-cooldown functionality to the parent class
-        if self.iframes > 0:
-            self.iframes -= 1
-            self.image.set_alpha(128)  # Make the player semi-transparent during iframes
-        else:
-            self.image.set_alpha(255)  # Reset transparency
-            self.end_iframes()  # Call end_iframes when iframes are over
 
-        if self.hit_cooldown > 0:
-            self.hit_cooldown -= 1
+        if self.health <= 0:
+            player_death_event = pygame.event.Event(PLAYERDEATH, custom_text='YA DEAD')
+            pygame.event.post(player_death_event)
 
         # Implement character movement and actions here
         keys = pygame.key.get_pressed()
@@ -78,13 +134,24 @@ class Player(Character):
                 self.rect.y -= self.speed
             if keys[pygame.K_s]:
                 self.rect.y += self.speed
-        # else:
-        #     # Multiplayer mode controls
-        #     if self.network:
-        #         server_data = self.network.getP()
-        #         if server_data:
-        #             self.rect.x = server_data.get("x", self.rect.x)
-        #             self.rect.y = server_data.get("y", self.rect.y)
+
+            # else:
+            #     # Multiplayer mode controls
+            #     if self.network:
+            #         server_data = self.network.getP()
+            #         if server_data:
+            #             self.rect.x = server_data.get("x", self.rect.x)
+            #             self.rect.y = server_data.get("y", self.rect.y)
+
+        for enemy in enemies:
+            if self.aoe_zone.rect.colliderect(enemy.rect):
+                enemy_health = self.attack(enemy)
+                if enemy_health <= 0:
+                    enemy.kill()
+                    del enemy
+        # Update the transparent area
+        self.aoe_zone.update(self.rect)
+
         ####### This is deprecated since implemented the camera #######
         # # Keep player on the game_screen
 
@@ -99,28 +166,8 @@ class Player(Character):
 
         # Add more logic for shooting, health management, etc.
 
-    def take_damage(self, damage):
-        # Deduct health when the player takes damage
-        if not self.invincible and self.hit_cooldown == 0 and self.health > 0:
-            self.health -= damage
-            self.logger.debug(f"Current HP: {self.health}")
-            self.hit()
-        elif self.health <= 0:
-            player_death_event = pygame.event.Event(PLAYERDEATH, custom_text='YA DEAD')
-            pygame.event.post(player_death_event)
-
-    def hit(self):
-        # Handle iframes only
-        if not self.invincible:
-            self.iframes = PLAYER_CONFIG["iframes"]
-            self.invincible = True
-            # Set the cooldown to prevent repeated hits
-            self.hit_cooldown = self.hit_cooldown_duration
-
-    def end_iframes(self):
-        # Called when iframes are over
-        self.invincible = False
-        self.was_hit = False  # Reset the flag for the next collision
+    def attack(self, enemy):
+        return enemy.take_damage(self.damage)
 
     def get_player_data(self):
         return {

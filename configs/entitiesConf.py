@@ -1,6 +1,7 @@
 GENERIC_CONFIG = {
     "speed": 5,
-    "health": 100,
+    "health": 10,
+    "iframes": 90,
 }
 
 PLAYER_CONFIG = {
@@ -9,6 +10,7 @@ PLAYER_CONFIG = {
     "damage": 10,
     "iframes": 240,
     "level": 1,
+    "aoe_radius": 100
 }
 
 SIMPLE_ENEMY_CONFIG = {
@@ -17,6 +19,7 @@ SIMPLE_ENEMY_CONFIG = {
     "damage": 10,
     "exp": 2,
     "points": 10,
+
 }
 
 MISC = {

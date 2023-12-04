@@ -6,7 +6,10 @@ from pygame.locals import (
 )
 
 from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.Events import (PLAYERDEATH)
+from cold_curve_nevada.configs.Events import (
+    PLAYERDEATH,
+    ENEMYDEATH,
+)
 from cold_curve_nevada.configs.appConf import Settings
 from cold_curve_nevada.configs.screenLogConf import ScreenLog
 from cold_curve_nevada.src.characters.generEnemyModel import Enemy
@@ -15,7 +18,7 @@ from cold_curve_nevada.src.utils.cameraModel import CameraGroup
 
 class ColdCurveNevada():
 
-    def __init__(self,difficulty, player_index, multiplayer: False) -> None:
+    def __init__(self, difficulty, player_index, multiplayer: False) -> None:
         super().__init__()
         pygame.init()  # Initialize Pygame
 
@@ -51,7 +54,7 @@ class ColdCurveNevada():
         self.all_sprites = CameraGroup()
 
         self.enemies = pygame.sprite.Group()
-        for _ in range(5):  # Create 5 enemy characters (you can adjust the number)
+        for _ in range(2):  # Create 5 enemy characters (you can adjust the number)
             enemy = Enemy(difficulty)
             self.logger.info(f"Instantiated {enemy.id}")
             self.enemies.add(enemy)
@@ -71,12 +74,16 @@ class ColdCurveNevada():
             elif event.type == QUIT:
                 self.running = False
             elif event.type == PLAYERDEATH:
-                #Here will be a death screen or something
+                # Here will be a death screen or something
                 self.logger.info(event.custom_text)
                 self.running = False
+            #     NOT USED YET (if ever)
+            # elif event.type == ENEMYDEATH:
+            #     # Here will be a death screen or something
+            #     self.logger.info(event.custom_text)
 
     def update(self):
-        self.player_group.update()
+        self.player_group.update(self.enemies)
         self.enemies_group.update(self.players)  # Update enemies based on all players
 
     def render(self):
@@ -92,8 +99,8 @@ class ColdCurveNevada():
 
     def main_loop(self):
         while self.running:
-            self.handle_events()
             self.update()
+            self.handle_events()
 
             if self.multiplayer:
                 # Send and receive player data through the network
@@ -121,11 +128,11 @@ class ColdCurveNevada():
 
         # Add a player instance to the list
         self.players.append(player_instance)
-        player_instance.set_multiplayer(self.multiplayer)
+        player_instance.mulitplayer = self.multiplayer
         self.network = player_instance.set_network(player_instance=player_instance, player_index=self.player_index)
         # self.players[int(self.player_index)].update_from_data(player_instance.get_player_data())
         # player_instance.init_network()  # Initialize network connection
         # self.network.send(player_data)
-
         self.player_group.add(player_instance)  # Add the player to the group
+        self.all_sprites.add(player_instance.aoe_zone)
         self.all_sprites.add(player_instance)
