@@ -7,23 +7,26 @@ GENERIC_CONFIG = {
 PLAYER_CONFIG = {
     "speed": 30,
     "health": 100,
-    "damage": 10,
     "iframes": 240,
     "level": 1,
-    "aoe_radius": 100
+    "aoe_radius": 100,
+    "aoe_attack_speed": 5,
+    "aoe_damage": 10,
+    "line_length": 110,
+    "wave_frequency": 0.5
 }
 
 SIMPLE_ENEMY_CONFIG = {
     "speed": 5,
-    "health": 100,
+    "health": 20,
     "damage": 10,
-    "exp": 2,
+    "exp": 10,
     "points": 10,
 
 }
 
 MISC = {
-
+    "base_exp": 12,
     "difficulty_multipliers": [
         {  # Easy
             "speed": 0.9,
@@ -56,7 +59,7 @@ MISC = {
             "speed": 3,
             "health": 2.5,
             "damage": 3,
-            "exp": 1.5,
+            "exp": 2.5,
             "points": 1,
 
         },

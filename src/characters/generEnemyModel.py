@@ -1,8 +1,8 @@
 from random import choice
 
 from cold_curve_nevada.configs import logConf
-from configs.entitiesConf import SIMPLE_ENEMY_CONFIG, MISC
-from src.characters.characterModel import Character
+from cold_curve_nevada.configs.entitiesConf import SIMPLE_ENEMY_CONFIG, MISC
+from cold_curve_nevada.src.characters.characterModel import Character
 
 logger = logConf.logger
 
@@ -66,7 +66,7 @@ class Enemy(Character):
         super().update()
 
         for player in players:
-            # Move the enemy towards the player (you can customize the behavior)
+            # Move the enemy towards the player
             dx = player.rect.x - self.rect.x
             dy = player.rect.y - self.rect.y
             dist = (dx ** 2 + dy ** 2) ** 0.5  # Calculate distance to the player
@@ -81,4 +81,11 @@ class Enemy(Character):
 
     def attack(self, player):
         # Calculate and apply damage to the player
+        logger.info(f"Enemy {self.id} current HP: {self.health}")
+
         player.take_damage(self.damage)  # Adjust the damage value as needed
+
+    def hit(self):
+        # just used to override the default is-hit mechanism and the
+        # invincibility after being hit
+        pass

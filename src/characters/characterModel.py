@@ -109,7 +109,6 @@ class Character(pygame.sprite.Sprite):
         if not self.invincible and self.hit_cooldown == 0 and self.health > 0:
             self.health -= damage
             self.hit()
-            logger.info(f"{self.id} current HP: {self.health}")
             return self.health
         else:
             return self.health

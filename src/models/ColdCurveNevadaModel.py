@@ -1,3 +1,5 @@
+import time
+
 import pygame
 from pygame.locals import (
     K_ESCAPE,
@@ -8,12 +10,11 @@ from pygame.locals import (
 from cold_curve_nevada.configs import logConf
 from cold_curve_nevada.configs.Events import (
     PLAYERDEATH,
-    ENEMYDEATH,
 )
 from cold_curve_nevada.configs.appConf import Settings
 from cold_curve_nevada.configs.screenLogConf import ScreenLog
-from cold_curve_nevada.src.characters.generEnemyModel import Enemy
-from cold_curve_nevada.src.utils.cameraModel import CameraGroup
+from cold_curve_nevada.src.models.cameraModel import CameraGroup
+from cold_curve_nevada.src.utils.spawnFunctions import Spawner
 
 
 class ColdCurveNevada():
@@ -46,6 +47,9 @@ class ColdCurveNevada():
         self.players = []
         self.player_index = player_index
 
+        # Game difficulty
+        self.difficulty = difficulty
+
         # Create sprite groups
         self.player_group = pygame.sprite.Group()  # Create a group for the player
         self.enemies_group = pygame.sprite.Group()  # Create a group for enemies
@@ -54,13 +58,15 @@ class ColdCurveNevada():
         self.all_sprites = CameraGroup()
 
         self.enemies = pygame.sprite.Group()
-        for _ in range(2):  # Create 5 enemy characters (you can adjust the number)
-            enemy = Enemy(difficulty)
-            self.logger.info(f"Instantiated {enemy.id}")
-            self.enemies.add(enemy)
+        # for _ in range(50):  # Create 5 enemy characters (you can adjust the number)
+        #     enemy = Enemy(difficulty)
+        #     self.logger.info(f"Instantiated {enemy.id}")
+        #     self.enemies.add(enemy)
 
-        self.enemies_group.add(self.enemies)  # Add the enemies to the group
-        self.all_sprites.add(self.enemies)
+        # self.enemies_group.add(self.enemies)  # Add the enemies to the group
+        # self.all_sprites.add(self.enemies)
+
+        self.spawner = Spawner(sprite_group=self.all_sprites, enemy_group=self.enemies_group, player=self.players)
 
         self.screen_logs = ScreenLog()
         self.frame_count = 0  # Initialize frame count
@@ -83,6 +89,8 @@ class ColdCurveNevada():
             #     self.logger.info(event.custom_text)
 
     def update(self):
+
+
         self.player_group.update(self.enemies)
         self.enemies_group.update(self.players)  # Update enemies based on all players
 
@@ -98,9 +106,18 @@ class ColdCurveNevada():
         pygame.display.flip()
 
     def main_loop(self):
+
         while self.running:
+
             self.update()
             self.handle_events()
+
+            # Spawn and add new enemies to the main sprite group
+            new_enemies = self.spawner.spawn_enemies(difficulty=self.difficulty)
+            for enemy in new_enemies:
+                self.enemies.add(enemy)
+            self.enemies_group.add(self.enemies)  # Add the enemies to the group
+            self.all_sprites.add(self.enemies)
 
             if self.multiplayer:
                 # Send and receive player data through the network
@@ -135,4 +152,5 @@ class ColdCurveNevada():
         # self.network.send(player_data)
         self.player_group.add(player_instance)  # Add the player to the group
         self.all_sprites.add(player_instance.aoe_zone)
+        # self.all_sprites.add(player_instance.line_of_doom)
         self.all_sprites.add(player_instance)

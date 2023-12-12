@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from cold_curve_nevada.configs import logConf
@@ -7,7 +9,9 @@ from cold_curve_nevada.configs.Events import (
 )
 from cold_curve_nevada.configs.entitiesConf import PLAYER_CONFIG
 from cold_curve_nevada.src.characters.characterModel import Character
-from cold_curve_nevada.src.utils.networkModel import Network
+from cold_curve_nevada.src.models.attacksModel import AoE_Zone
+from cold_curve_nevada.src.models.networkModel import Network
+from cold_curve_nevada.src.utils.utilFunctions import Utils
 
 logger = logConf.logger
 
@@ -22,7 +26,6 @@ class Player(Character):
 
         self.__speed = PLAYER_CONFIG["speed"]
         self.__health = PLAYER_CONFIG["health"]
-        self.__damage = PLAYER_CONFIG["damage"]
 
         self.__hit_cooldown_duration = PLAYER_CONFIG["iframes"]
 
@@ -30,21 +33,37 @@ class Player(Character):
         self.__network = None
 
         # Inner class for semi-transparent area
-        class AoE_Zone(pygame.sprite.Sprite):
-            def __init__(self, player_rect):
-                super().__init__()
-                self.image = pygame.Surface((PLAYER_CONFIG["aoe_radius"] * 2, PLAYER_CONFIG["aoe_radius"] * 2),
-                                            pygame.SRCALPHA)
-                pygame.draw.circle(self.image, (255, 255, 255, 32),
-                                   (PLAYER_CONFIG["aoe_radius"], PLAYER_CONFIG["aoe_radius"]),
-                                   PLAYER_CONFIG["aoe_radius"])
-                self.rect = self.image.get_rect(center=player_rect.center)
-
-            def update(self, player_rect):
-                self.rect.center = player_rect.center
 
         # Create an instance of the AoE_Zone class
         self.__aoe_zone = AoE_Zone(self.rect)
+        # self.__line_of_doom = RotatingLine(self.rect)
+
+        self.__level = PLAYER_CONFIG["level"]
+        self.__current_exp = 0
+
+    @property
+    def line_of_doom(self):
+        return self.__line_of_doom
+
+    @line_of_doom.setter
+    def line_of_doom(self, value):
+        self.__line_of_doom = value
+
+    @property
+    def current_exp(self):
+        return self.__current_exp
+
+    @current_exp.setter
+    def current_exp(self, value):
+        self.__current_exp = value
+
+    @property
+    def level(self):
+        return self.__level
+
+    @level.setter
+    def level(self, value):
+        self.__level = value
 
     @property
     def speed(self):
@@ -61,14 +80,6 @@ class Player(Character):
     @health.setter
     def health(self, value):
         self.__health = value
-
-    @property
-    def damage(self):
-        return self.__damage
-
-    @damage.setter
-    def damage(self, value):
-        self.__damage = value
 
     @property
     def hit_cooldown_duration(self):
@@ -145,12 +156,21 @@ class Player(Character):
 
         for enemy in enemies:
             if self.aoe_zone.rect.colliderect(enemy.rect):
-                enemy_health = self.attack(enemy)
-                if enemy_health <= 0:
-                    enemy.kill()
-                    del enemy
-        # Update the transparent area
+                if self.aoe_zone.can_attack(Utils.get_curr_time()):
+                    enemy_health = self.attack(enemy)
+                    self.aoe_zone.last_attack_time = Utils.get_curr_time()
+                    if enemy_health <= 0:
+                        logger.debug(f"Total enemies before kill:{len(enemies)}")
+                        enemy.kill()
+                        self.current_exp += enemy.exp
+                        del enemy
+
+        # # Update the transparent area
         self.aoe_zone.update(self.rect)
+        # self.__line_of_doom.update(self.rect)
+
+        # Level Up
+        self.leveling_management(level=self.level)
 
         ####### This is deprecated since implemented the camera #######
         # # Keep player on the game_screen
@@ -167,7 +187,9 @@ class Player(Character):
         # Add more logic for shooting, health management, etc.
 
     def attack(self, enemy):
-        return enemy.take_damage(self.damage)
+        logger.info(f"Player {self.id} current HP: {self.health}")
+
+        return enemy.take_damage(self.aoe_zone.damage)
 
     def get_player_data(self):
         return {
@@ -185,3 +207,27 @@ class Player(Character):
             self.rect.y = data["y"]
             self.health = data["health"]
             # Update any other relevant data you received
+
+    def leveling_management(self, level):
+        exp_need_for_level_up = Utils.calculate_experience_custom(level=level)
+        if (exp_need_for_level_up <= self.current_exp):
+            # TODO power up for the attacks
+            self.level += 1
+
+            upgrades = ['aoe_radius', 'aoe_attack_speed', 'aoe_damage']
+            weights = [1.3, 1, 1]
+
+            upgrade = random.choices(upgrades, weights, k=1)[0]
+
+            if upgrade == 'aoe_radius':
+                self.aoe_zone.radius += 20
+            elif upgrade == 'aoe_attack_speed':
+                self.aoe_zone.attack_speed += 1
+            elif upgrade == 'aoe_damage':
+                self.aoe_zone.damage += 10
+
+            logger.info(f" radius {self.aoe_zone.radius} damage {self.aoe_zone.damage} as {self.aoe_zone.attack_speed}")
+            # carry over any exp left to the next level
+            self.current_exp = self.current_exp - exp_need_for_level_up
+            logger.info(f"Lvl up: {self.level}"
+                        f" & current exp: {self.current_exp}/{Utils.calculate_experience_custom(level=self.level)}")
