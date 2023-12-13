@@ -1,5 +1,3 @@
-import time
-
 import pygame
 from pygame.locals import (
     K_ESCAPE,
@@ -19,7 +17,7 @@ from cold_curve_nevada.src.utils.spawnFunctions import Spawner
 
 class ColdCurveNevada():
 
-    def __init__(self, difficulty, player_index, multiplayer: False) -> None:
+    def __init__(self, difficulty: 1, player_index: 0, multiplayer: False) -> None:
         super().__init__()
         pygame.init()  # Initialize Pygame
 
@@ -58,13 +56,7 @@ class ColdCurveNevada():
         self.all_sprites = CameraGroup()
 
         self.enemies = pygame.sprite.Group()
-        # for _ in range(50):  # Create 5 enemy characters (you can adjust the number)
-        #     enemy = Enemy(difficulty)
-        #     self.logger.info(f"Instantiated {enemy.id}")
-        #     self.enemies.add(enemy)
 
-        # self.enemies_group.add(self.enemies)  # Add the enemies to the group
-        # self.all_sprites.add(self.enemies)
 
         self.spawner = Spawner(sprite_group=self.all_sprites, enemy_group=self.enemies_group, player=self.players)
 
@@ -89,7 +81,6 @@ class ColdCurveNevada():
             #     self.logger.info(event.custom_text)
 
     def update(self):
-
 
         self.player_group.update(self.enemies)
         self.enemies_group.update(self.players)  # Update enemies based on all players
