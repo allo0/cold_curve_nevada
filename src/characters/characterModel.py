@@ -11,75 +11,75 @@ logger = logConf.logger
 class Character(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.__id = str(uuid.uuid4())[-12:]
+        self._id = str(uuid.uuid4())[-12:]
         self.image = pygame.Surface((32, 32))  # Example placeholder image
         self.image.fill((255, 0, 0))  # Red square
         self.rect = self.image.get_rect()
         # TODO change the movement system to Vector2D
         self.rect.center = (x, y)
-        self.__speed = GENERIC_CONFIG["speed"]
-        self.__health = GENERIC_CONFIG["health"]
-        self.__iframes = 0  # Number of iframes after being hit (0 means not invulnerable)
-        self.__invincible = False  # Flag to track if the player is currently invincible
+        self._speed = GENERIC_CONFIG["speed"]
+        self._health = GENERIC_CONFIG["health"]
+        self._iframes = 0  # Number of iframes after being hit (0 means not invulnerable)
+        self._invincible = False  # Flag to track if the player is currently invincible
         # Cooldown for hit
-        self.__hit_cooldown = 0  # Initialize the cooldown timer
-        self.__hit_cooldown_duration = GENERIC_CONFIG["iframes"]  # Adjust this value as needed (in frames)
+        self._hit_cooldown = 0  # Initialize the cooldown timer
+        self._hit_cooldown_duration = GENERIC_CONFIG["iframes"]  # Adjust this value as needed (in frames)
 
     @property
     def speed(self):
-        return self.__speed
+        return self._speed
 
     @speed.setter
     def speed(self, value):
-        self.__speed = value
+        self._speed = value
 
     @property
     def hit_cooldown(self):
-        return self.__hit_cooldown
+        return self._hit_cooldown
 
     @hit_cooldown.setter
     def hit_cooldown(self, value):
-        self.__hit_cooldown = value
+        self._hit_cooldown = value
 
     @property
     def id(self):
-        return self.__id
+        return self._id
 
     @id.setter
     def id(self, value):
-        self.__id = value
+        self._id = value
 
     @property
     def health(self):
-        return self.__health
+        return self._health
 
     @health.setter
     def health(self, value):
-        self.__health = value
+        self._health = value
 
     @property
     def hit_cooldown_duration(self):
-        return self.__hit_cooldown_duration
+        return self._hit_cooldown_duration
 
     @hit_cooldown_duration.setter
     def hit_cooldown_duration(self, value):
-        self.__hit_cooldown_duration = value
+        self._hit_cooldown_duration = value
 
     @property
     def iframes(self):
-        return self.__iframes
+        return self._iframes
 
     @iframes.setter
     def iframes(self, value):
-        self.__iframes = value
+        self._iframes = value
 
     @property
     def invincible(self):
-        return self.__invincible
+        return self._invincible
 
     @invincible.setter
     def invincible(self, value):
-        self.__invincible = value
+        self._invincible = value
 
     def update(self):
         # Generic method, to be implemented by the subclasses

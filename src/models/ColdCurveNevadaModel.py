@@ -7,8 +7,7 @@ from pygame.locals import (
 
 from cold_curve_nevada.configs import logConf
 from cold_curve_nevada.configs.Events import (
-    PLAYERDEATH,
-)
+    PLAYERDEATH, FINAL_BOSS_KILLED, )
 from cold_curve_nevada.configs.appConf import Settings
 from cold_curve_nevada.configs.screenLogConf import ScreenLog
 from cold_curve_nevada.src.models.cameraModel import CameraGroup
@@ -45,6 +44,8 @@ class ColdCurveNevada():
         self.players = []
         self.player_index = player_index
 
+        self.total_enemies_killed = 0
+
         # Game difficulty
         self.difficulty = difficulty
 
@@ -56,7 +57,6 @@ class ColdCurveNevada():
         self.all_sprites = CameraGroup()
 
         self.enemies = pygame.sprite.Group()
-
 
         self.spawner = Spawner(sprite_group=self.all_sprites, enemy_group=self.enemies_group, player=self.players)
 
@@ -75,10 +75,8 @@ class ColdCurveNevada():
                 # Here will be a death screen or something
                 self.logger.info(event.custom_text)
                 self.running = False
-            #     NOT USED YET (if ever)
-            # elif event.type == ENEMYDEATH:
-            #     # Here will be a death screen or something
-            #     self.logger.info(event.custom_text)
+            elif event.type == FINAL_BOSS_KILLED:
+                self.logger.info(event.custom_text)
 
     def update(self):
 
@@ -104,7 +102,7 @@ class ColdCurveNevada():
             self.handle_events()
 
             # Spawn and add new enemies to the main sprite group
-            new_enemies = self.spawner.spawn_enemies(difficulty=self.difficulty)
+            new_enemies = self.spawner.spawn_enemies(difficulty=3)
             for enemy in new_enemies:
                 self.enemies.add(enemy)
             self.enemies_group.add(self.enemies)  # Add the enemies to the group
@@ -120,6 +118,8 @@ class ColdCurveNevada():
                     other_player_data = self.network.send("")  # Sending an empty message just to receive data
                     if other_player_data is not None and idx != self.network.get_player_index():
                         player.update_from_data(other_player_data)
+
+            # Get total kills for all players
 
             self.render()
             self.clock.tick(Settings.FPS)

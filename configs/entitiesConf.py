@@ -16,7 +16,7 @@ PLAYER_CONFIG = {
     "wave_frequency": 0.5
 }
 
-SIMPLE_ENEMY_CONFIG = {
+ENEMY_CONFIG = {
     "speed": 5,
     "health": 20,
     "damage": 10,
@@ -67,6 +67,7 @@ MISC = {
     ],
     "spawns":
         [
+            #TODO When making the better spawn locations, remove magic numbers and make it relative
             (1000, 100),
             (200, 200),
             (300, 1000),

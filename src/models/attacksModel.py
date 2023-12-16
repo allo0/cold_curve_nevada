@@ -11,54 +11,54 @@ logger = logConf.logger
 class AoE_Zone(pygame.sprite.Sprite):
     def __init__(self, player_rect):
         super().__init__()
-        self.__radius = PLAYER_CONFIG["aoe_radius"]
-        self.__damage = PLAYER_CONFIG["aoe_damage"]
-        self.__attack_speed = PLAYER_CONFIG["aoe_attack_speed"]
-        self.image = pygame.Surface((2 * self.__radius, 2 * self.__radius), pygame.SRCALPHA)
+        self._radius = PLAYER_CONFIG["aoe_radius"]
+        self._damage = PLAYER_CONFIG["aoe_damage"]
+        self._attack_speed = PLAYER_CONFIG["aoe_attack_speed"]
+        self.image = pygame.Surface((2 * self._radius, 2 * self._radius), pygame.SRCALPHA)
         pygame.draw.circle(self.image, (255, 255, 255, 32),
-                           (self.__radius, self.__radius),
-                           self.__radius)
+                           (self._radius, self._radius),
+                           self._radius)
         self.rect = self.image.get_rect(center=player_rect.center)
-        self.__last_attack_time = 0  # Track the time of the last attack
+        self._last_attack_time = 0  # Track the time of the last attack
 
     @property
     def damage(self):
-        return self.__damage
+        return self._damage
 
     @damage.setter
     def damage(self, value):
-        self.__damage = value
+        self._damage = value
 
     @property
     def last_attack_time(self):
-        return self.__last_attack_time
+        return self._last_attack_time
 
     @last_attack_time.setter
     def last_attack_time(self, value):
-        self.__last_attack_time = value
+        self._last_attack_time = value
 
     @property
     def attack_speed(self):
-        return self.__attack_speed
+        return self._attack_speed
 
     @attack_speed.setter
     def attack_speed(self, value):
-        self.__attack_speed = value
+        self._attack_speed = value
 
     @property
     def radius(self):
-        return self.__radius
+        return self._radius
 
     @radius.setter
     def radius(self, value):
-        self.__radius = value
+        self._radius = value
         self._update_image()
 
     def _update_image(self):
-        self.image = pygame.Surface((2 * self.__radius, 2 * self.__radius), pygame.SRCALPHA)
+        self.image = pygame.Surface((2 * self._radius, 2 * self._radius), pygame.SRCALPHA)
         pygame.draw.circle(self.image, (255, 255, 255, 32),
-                           (self.__radius, self.__radius),
-                           self.__radius)
+                           (self._radius, self._radius),
+                           self._radius)
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def update(self, player_rect):
