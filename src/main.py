@@ -1,6 +1,6 @@
 import sys
 
-from cold_curve_nevada.src.characters.playerModel import Player
+from src.characters.playerModel import Player
 from models.ColdCurveNevadaModel import ColdCurveNevada
 
 # TODO implement create a randomly generated map (with walls and collision etc) each time (but somewhat big to show the camera functionality)

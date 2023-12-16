@@ -7,6 +7,7 @@ GENERIC_CONFIG = {
 PLAYER_CONFIG = {
     "speed": 30,
     "health": 100,
+    "level_up_heal": 0.15,
     "iframes": 240,
     "level": 1,
     "aoe_radius": 100,
@@ -67,7 +68,7 @@ MISC = {
     ],
     "spawns":
         [
-            #TODO When making the better spawn locations, remove magic numbers and make it relative
+            # TODO When making the better spawn locations, remove magic numbers and make it relative
             (1000, 100),
             (200, 200),
             (300, 1000),
@@ -76,3 +77,40 @@ MISC = {
             (600, 1200)
         ]
 }
+
+SPAWN_PATTERNS = [
+    {
+        "time_limit": 30,
+        "possible_spawns": [
+            {"type": "generic", "quantity": 2}
+        ]
+    },
+    {
+        "time_limit": 90,
+        "possible_spawns": [
+            {"type": "generic", "quantity": 3},
+            {"type": "fast", "chance": 0.3},
+            {"type": "tank", "chance": 0.05}
+        ]
+    },
+    {
+        "time_limit": 120,
+        "possible_spawns": [
+            {"type": "strong", "quantity": 2},
+            {"type": "tank", "chance": 0.3}
+        ]
+    },
+    {
+        "time_limit": 180,
+        "possible_spawns": [
+            {"type": "strong", "quantity": 3},
+            {"type": "fast", "chance": 0.5},
+            {"type": "tank", "chance": 0.3}
+        ]
+    }
+]
+
+BOSS_SPAWN_CONDITIONS = [
+    {"kill_threshold": 50, "boss_stage": 0, "boss_type": "first_boss"},
+    {"kill_threshold": 500, "boss_stage": 1, "boss_type": "second_boss"}
+]

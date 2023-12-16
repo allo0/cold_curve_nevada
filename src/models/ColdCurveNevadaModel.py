@@ -5,13 +5,13 @@ from pygame.locals import (
     QUIT,
 )
 
-from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.Events import (
+from configs import logConf
+from configs.Events import (
     PLAYERDEATH, FINAL_BOSS_KILLED, )
-from cold_curve_nevada.configs.appConf import Settings
-from cold_curve_nevada.configs.screenLogConf import ScreenLog
-from cold_curve_nevada.src.models.cameraModel import CameraGroup
-from cold_curve_nevada.src.utils.spawnFunctions import Spawner
+from configs.appConf import Settings
+from configs.screenLogConf import ScreenLog
+from src.models.cameraModel import CameraGroup
+from src.utils.spawnFunctions import Spawner
 
 
 class ColdCurveNevada():
@@ -73,10 +73,10 @@ class ColdCurveNevada():
                 self.running = False
             elif event.type == PLAYERDEATH:
                 # Here will be a death screen or something
-                self.logger.info(event.custom_text)
+                self.logger.debug(event.custom_text)
                 self.running = False
             elif event.type == FINAL_BOSS_KILLED:
-                self.logger.info(event.custom_text)
+                self.logger.debug(event.custom_text)
 
     def update(self):
 
@@ -102,7 +102,7 @@ class ColdCurveNevada():
             self.handle_events()
 
             # Spawn and add new enemies to the main sprite group
-            new_enemies = self.spawner.spawn_enemies(difficulty=3)
+            new_enemies = self.spawner.spawn_enemies(difficulty=self.difficulty)
             for enemy in new_enemies:
                 self.enemies.add(enemy)
             self.enemies_group.add(self.enemies)  # Add the enemies to the group

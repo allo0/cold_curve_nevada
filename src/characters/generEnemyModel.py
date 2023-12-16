@@ -1,8 +1,8 @@
 from random import choice
 
-from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.entitiesConf import ENEMY_CONFIG, MISC
-from cold_curve_nevada.src.characters.characterModel import Character
+from configs import logConf
+from configs.entitiesConf import ENEMY_CONFIG, MISC
+from src.characters.characterModel import Character
 
 logger = logConf.logger
 

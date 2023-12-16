@@ -3,8 +3,8 @@ import time
 
 import pygame
 
-from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.entitiesConf import MISC
+from configs import logConf
+from configs.entitiesConf import MISC
 
 logger = logConf.logger
 

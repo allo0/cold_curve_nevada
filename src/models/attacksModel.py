@@ -2,8 +2,8 @@ import math
 
 import pygame
 
-from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.entitiesConf import PLAYER_CONFIG
+from configs import logConf
+from configs.entitiesConf import PLAYER_CONFIG
 
 logger = logConf.logger
 

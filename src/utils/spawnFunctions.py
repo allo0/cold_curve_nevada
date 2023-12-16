@@ -1,8 +1,9 @@
 import random
 import time
 
-from cold_curve_nevada.src.characters.generEnemyModel import Enemy
+from src.characters.generEnemyModel import Enemy
 from configs import logConf
+from configs.entitiesConf import SPAWN_PATTERNS, BOSS_SPAWN_CONDITIONS
 from src.characters.enemiesModel import FastEnemy, TankEnemy, StrongEnemy, FirstBossEnemy, SecondBossEnemy
 
 logger = logConf.logger
@@ -37,6 +38,10 @@ class Spawner(Enemy):
         self._player = player
         self._spawned_boss = 0
 
+        self.spawn_config = SPAWN_PATTERNS
+        self.boss_spawn_conditions = BOSS_SPAWN_CONDITIONS
+
+
     @property
     def spawned_boss(self):
         return self._spawned_boss
@@ -54,58 +59,49 @@ class Spawner(Enemy):
         self._player = value
 
     def spawn_enemies(self, difficulty):
-        total_enemies_killed = self.player[0].enemies_killed
-
         current_time = time.time()
-        if current_time - self.last_spawn_time >= self.next_spawn_delay:
-
-            new_enemies = []
-            elapsed_time = time.time() - self.start_time
-            if elapsed_time < 30:  # First 30 secs
-                for _ in range(2):
-                    enemy = EnemyFactory.create_enemy("generic", difficulty=difficulty)
-                    new_enemies.append(enemy)
-            if 30 < elapsed_time < 90:  # 30s <-> 1.5m
-                for _ in range(3):
-                    enemy = EnemyFactory.create_enemy("generic", difficulty=difficulty)
-                    new_enemies.append(enemy)
-                if random.random() < 0.3:  # 30% chance for fast
-                    enemy = EnemyFactory.create_enemy("fast", difficulty=difficulty)
-                    new_enemies.append(enemy)
-                if random.random() < 0.05:  # 5% chance for tank
-                    enemy = EnemyFactory.create_enemy("tank", difficulty=difficulty)
-                    new_enemies.append(enemy)
-            if 90 < elapsed_time < 120:  # 1.5m <-> 2m   Hard round
-                for _ in range(2):
-                    enemy = EnemyFactory.create_enemy("strong", difficulty=difficulty)
-                    new_enemies.append(enemy)
-                if random.random() < 0.3:  # 30% chance for tank
-                    enemy = EnemyFactory.create_enemy("tank", difficulty=difficulty)
-                    new_enemies.append(enemy)
-            if 120 < elapsed_time < 180:  # 2m <-> 3m   whatever round
-                for _ in range(3):
-                    enemy = EnemyFactory.create_enemy("strong", difficulty=difficulty)
-                    new_enemies.append(enemy)
-                if random.random() < 0.5:  # 50% chance for fast
-                    enemy = EnemyFactory.create_enemy("fast", difficulty=difficulty)
-                    new_enemies.append(enemy)
-                if random.random() < 0.3:  # 30% chance for tank
-                    enemy = EnemyFactory.create_enemy("tank", difficulty=difficulty)
-                    new_enemies.append(enemy)
-            if total_enemies_killed >= 50 and self.spawned_boss == 0:  # 50 kill boss spawn
-                enemy = EnemyFactory.create_enemy("second_boss", difficulty=difficulty)
-                new_enemies.append(enemy)
-                self.spawned_boss += 1
-            if total_enemies_killed >= 500 and self.spawned_boss == 1:  # 500 kill boss spawn
-                enemy = EnemyFactory.create_enemy("second_boss", difficulty=difficulty)
-                new_enemies.append(enemy)
-                self.spawned_boss += 1
-
-            # Reset the last spawn time and calculate the next spawn delay
-            self.last_spawn_time = current_time
-            self.next_spawn_delay = random.uniform(0.5, 2)
-
-            return new_enemies
-
-        else:
+        if current_time - self.last_spawn_time < self.next_spawn_delay:
             return []
+
+        total_enemies_killed = self.player[0].enemies_killed
+        new_enemies = self.generate_enemies(difficulty)
+        new_enemies += self.generate_bosses(total_enemies_killed, difficulty)
+
+        self.last_spawn_time = current_time
+        self.next_spawn_delay = random.uniform(0.5, 2)
+
+        return new_enemies
+
+    def generate_enemies(self, difficulty):
+        elapsed_time = time.time() - self.start_time
+        new_enemies = []
+
+        for field in self.spawn_config:
+            if elapsed_time < field["time_limit"]:
+                for enemy in field["possible_spawns"]:
+                    enemy_type = enemy["type"]
+                    quantity = enemy.get("quantity")
+                    chance = enemy.get("chance")
+                    self.create_and_add_enemies(enemy_type, quantity or chance, difficulty, new_enemies)
+                break
+
+        return new_enemies
+
+    def create_and_add_enemies(self, enemy_type, quantity_or_chance, difficulty, enemies_list):
+        if isinstance(quantity_or_chance, int):  # Fixed number of enemies
+            for _ in range(quantity_or_chance):
+                enemy = EnemyFactory.create_enemy(enemy_type, difficulty=difficulty)
+                enemies_list.append(enemy)
+        elif isinstance(quantity_or_chance, float):  # Chance-based enemy spawn
+            if random.random() < quantity_or_chance:
+                enemy = EnemyFactory.create_enemy(enemy_type, difficulty=difficulty)
+                enemies_list.append(enemy)
+
+    def generate_bosses(self, total_enemies_killed, difficulty):
+        new_enemies = []
+        for condition in self.boss_spawn_conditions:
+            if total_enemies_killed >= condition["kill_threshold"] and self.spawned_boss == condition["boss_stage"]:
+                enemy = EnemyFactory.create_enemy(condition["boss_type"], difficulty=difficulty)
+                new_enemies.append(enemy)
+                self.spawned_boss += 1
+        return new_enemies

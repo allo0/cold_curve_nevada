@@ -241,6 +241,15 @@ class Player(Character):
 
         return enemy.take_damage(self.aoe_zone.damage)
 
+    def heal_player(self, health):
+        new_health = self.health + health
+
+        # If new hp exceeds maximum set it to max hp
+        if new_health > PLAYER_CONFIG["health"]:
+            self.health = PLAYER_CONFIG["health"]
+        else:
+            self.health = new_health
+
     def get_player_data(self):
         return {
             "id": self.id,
@@ -258,13 +267,14 @@ class Player(Character):
             self.rect.y = data["y"]
             self.health = data["health"]
             self.enemies_killed = data["enemies_killed"]
-            # Update any other relevant data you received
 
     def leveling_management(self, level):
         exp_need_for_level_up = Utils.calculate_experience_custom(level=level)
-        if (exp_need_for_level_up <= self.current_exp):
+        if exp_need_for_level_up <= self.current_exp:
             self.level += 1
 
+            # heal player
+            self.heal_player(self.health * PLAYER_CONFIG["level_up_heal"])
             upgrades = ['aoe_radius', 'aoe_attack_speed', 'aoe_damage']
             weights = [1.3, 1, 1]
 
@@ -277,7 +287,7 @@ class Player(Character):
             elif upgrade == 'aoe_damage':
                 self.aoe_zone.damage += 10
 
-            logger.info(f" radius {self.aoe_zone.radius} damage {self.aoe_zone.damage} as {self.aoe_zone.attack_speed}")
+            logger.debug(f"radius {self.aoe_zone.radius} damage {self.aoe_zone.damage} as {self.aoe_zone.attack_speed}")
             # carry over any exp left to the next level
             self.current_exp = self.current_exp - exp_need_for_level_up
             logger.info(f"Lvl up: {self.level}"
@@ -300,4 +310,5 @@ class Player(Character):
                         self.enemies_killed += 1
                         self.total_points += enemy.points
                         del enemy
-                        logger.info(f"Player {self.id} enemies killed:{self.enemies_killed}")
+                        logger.info(
+                            f"Player {self.id} enemies killed: {self.enemies_killed} and total points: {self.total_points}")
