@@ -5,20 +5,20 @@ from pygame.locals import (
     QUIT,
 )
 
-from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.Events import (
-    PLAYERDEATH,
-    ENEMYDEATH,
-)
-from cold_curve_nevada.configs.appConf import Settings
-from cold_curve_nevada.configs.screenLogConf import ScreenLog
-from cold_curve_nevada.src.characters.generEnemyModel import Enemy
-from cold_curve_nevada.src.utils.cameraModel import CameraGroup
+from configs import logConf
+from configs.Events import (
+    PLAYERDEATH, FINAL_BOSS_KILLED, )
+from configs.appConf import Settings
+from configs.assetsConf import SOUNDS
+from configs.screenLogConf import ScreenLog
+from src.models.cameraModel import CameraGroup
+from src.models.soundModel import SoundController
+from src.utils.spawnFunctions import Spawner
 
 
 class ColdCurveNevada():
 
-    def __init__(self, difficulty, player_index, multiplayer: False) -> None:
+    def __init__(self, difficulty: 1, player_index: 0, multiplayer: False) -> None:
         super().__init__()
         pygame.init()  # Initialize Pygame
 
@@ -36,6 +36,9 @@ class ColdCurveNevada():
         # Create an instance of BackgroundGenerator
         # self.background = BackgroundGenerator()
 
+        # Initialize the SoundController
+        self.sound_controller = SoundController()
+
         # Set if it is multiplayer or not
         self.multiplayer = multiplayer
 
@@ -46,6 +49,11 @@ class ColdCurveNevada():
         self.players = []
         self.player_index = player_index
 
+        self.total_enemies_killed = 0
+
+        # Game difficulty
+        self.difficulty = difficulty
+
         # Create sprite groups
         self.player_group = pygame.sprite.Group()  # Create a group for the player
         self.enemies_group = pygame.sprite.Group()  # Create a group for enemies
@@ -54,13 +62,9 @@ class ColdCurveNevada():
         self.all_sprites = CameraGroup()
 
         self.enemies = pygame.sprite.Group()
-        for _ in range(2):  # Create 5 enemy characters (you can adjust the number)
-            enemy = Enemy(difficulty)
-            self.logger.info(f"Instantiated {enemy.id}")
-            self.enemies.add(enemy)
 
-        self.enemies_group.add(self.enemies)  # Add the enemies to the group
-        self.all_sprites.add(self.enemies)
+        self.spawner = Spawner(sprite_group=self.all_sprites, enemy_group=self.enemies_group, player=self.players,
+                               sound_controller=self.sound_controller)
 
         self.screen_logs = ScreenLog()
         self.frame_count = 0  # Initialize frame count
@@ -75,14 +79,15 @@ class ColdCurveNevada():
                 self.running = False
             elif event.type == PLAYERDEATH:
                 # Here will be a death screen or something
-                self.logger.info(event.custom_text)
+                self.logger.debug(event.custom_text)
+                self.sound_controller.play_sound(SOUNDS["death"], 0.5)
                 self.running = False
-            #     NOT USED YET (if ever)
-            # elif event.type == ENEMYDEATH:
-            #     # Here will be a death screen or something
-            #     self.logger.info(event.custom_text)
+            elif event.type == FINAL_BOSS_KILLED:
+                self.logger.debug(event.custom_text)
+                self.sound_controller.play_sound(SOUNDS["victory"], 1)
 
     def update(self):
+
         self.player_group.update(self.enemies)
         self.enemies_group.update(self.players)  # Update enemies based on all players
 
@@ -98,9 +103,21 @@ class ColdCurveNevada():
         pygame.display.flip()
 
     def main_loop(self):
+
+        # Start the background music
+        self.sound_controller.start_playlist(0.08)
+
         while self.running:
+
             self.update()
             self.handle_events()
+
+            # Spawn and add new enemies to the main sprite group
+            new_enemies = self.spawner.spawn_enemies(difficulty=self.difficulty)
+            for enemy in new_enemies:
+                self.enemies.add(enemy)
+            self.enemies_group.add(self.enemies)  # Add the enemies to the group
+            self.all_sprites.add(self.enemies)
 
             if self.multiplayer:
                 # Send and receive player data through the network
@@ -112,6 +129,8 @@ class ColdCurveNevada():
                     other_player_data = self.network.send("")  # Sending an empty message just to receive data
                     if other_player_data is not None and idx != self.network.get_player_index():
                         player.update_from_data(other_player_data)
+
+            # Get total kills for all players
 
             self.render()
             self.clock.tick(Settings.FPS)
@@ -135,4 +154,5 @@ class ColdCurveNevada():
         # self.network.send(player_data)
         self.player_group.add(player_instance)  # Add the player to the group
         self.all_sprites.add(player_instance.aoe_zone)
+        # self.all_sprites.add(player_instance.line_of_doom)
         self.all_sprites.add(player_instance)

@@ -1,6 +1,7 @@
 import pygame
-from configs.appConf import Settings
 from pygame.math import Vector2
+
+from configs.appConf import Settings
 
 
 class CameraGroup(pygame.sprite.Group):
