@@ -1,10 +1,11 @@
 import random
 import time
 
-from src.characters.generEnemyModel import Enemy
 from configs import logConf
+from configs.assetsConf import SOUNDS
 from configs.entitiesConf import SPAWN_PATTERNS, BOSS_SPAWN_CONDITIONS
 from src.characters.enemiesModel import FastEnemy, TankEnemy, StrongEnemy, FirstBossEnemy, SecondBossEnemy
+from src.characters.generEnemyModel import Enemy
 
 logger = logConf.logger
 
@@ -31,16 +32,16 @@ class EnemyFactory:
 
 class Spawner(Enemy):
 
-    def __init__(self, sprite_group, enemy_group, player):
+    def __init__(self, sprite_group, enemy_group, player, sound_controller):
         self.start_time = time.time()
         self.last_spawn_time = self.start_time
         self.next_spawn_delay = random.uniform(0.5, 2)
         self._player = player
         self._spawned_boss = 0
 
+        self.sound_controller = sound_controller
         self.spawn_config = SPAWN_PATTERNS
         self.boss_spawn_conditions = BOSS_SPAWN_CONDITIONS
-
 
     @property
     def spawned_boss(self):
@@ -103,5 +104,8 @@ class Spawner(Enemy):
             if total_enemies_killed >= condition["kill_threshold"] and self.spawned_boss == condition["boss_stage"]:
                 enemy = EnemyFactory.create_enemy(condition["boss_type"], difficulty=difficulty)
                 new_enemies.append(enemy)
+                self.sound_controller.play_sound_with_fadein_fadeout(SOUNDS["boss_spawn"], fadein_duration=2000,
+                                                                     total_duration=7, fadeout_duration=2000,
+                                                                     final_volume=0.5)
                 self.spawned_boss += 1
         return new_enemies

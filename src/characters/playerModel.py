@@ -12,13 +12,14 @@ from cold_curve_nevada.src.characters.characterModel import Character
 from cold_curve_nevada.src.models.attacksModel import AoE_Zone
 from cold_curve_nevada.src.models.networkModel import Network
 from cold_curve_nevada.src.utils.utilFunctions import Utils
+from configs.assetsConf import SOUNDS
 
 logger = logConf.logger
 
 
 class Player(Character):
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, sound_controller):
         super().__init__(x, y)
         logger.info(f"Player {self.id} initialized")
 
@@ -42,6 +43,8 @@ class Player(Character):
         self._current_exp = 0
         self._enemies_killed = 0
         self._total_points = 0
+
+        self.sound_controller = sound_controller
 
     @property
     def total_points(self):
@@ -272,6 +275,8 @@ class Player(Character):
         exp_need_for_level_up = Utils.calculate_experience_custom(level=level)
         if exp_need_for_level_up <= self.current_exp:
             self.level += 1
+
+            self.sound_controller.play_sound(SOUNDS["level_up"], 0.5)
 
             # heal player
             self.heal_player(self.health * PLAYER_CONFIG["level_up_heal"])

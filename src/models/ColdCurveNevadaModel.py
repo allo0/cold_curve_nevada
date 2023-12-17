@@ -9,8 +9,10 @@ from configs import logConf
 from configs.Events import (
     PLAYERDEATH, FINAL_BOSS_KILLED, )
 from configs.appConf import Settings
+from configs.assetsConf import SOUNDS
 from configs.screenLogConf import ScreenLog
 from src.models.cameraModel import CameraGroup
+from src.models.soundModel import SoundController
 from src.utils.spawnFunctions import Spawner
 
 
@@ -33,6 +35,9 @@ class ColdCurveNevada():
 
         # Create an instance of BackgroundGenerator
         # self.background = BackgroundGenerator()
+
+        # Initialize the SoundController
+        self.sound_controller = SoundController()
 
         # Set if it is multiplayer or not
         self.multiplayer = multiplayer
@@ -58,7 +63,8 @@ class ColdCurveNevada():
 
         self.enemies = pygame.sprite.Group()
 
-        self.spawner = Spawner(sprite_group=self.all_sprites, enemy_group=self.enemies_group, player=self.players)
+        self.spawner = Spawner(sprite_group=self.all_sprites, enemy_group=self.enemies_group, player=self.players,
+                               sound_controller=self.sound_controller)
 
         self.screen_logs = ScreenLog()
         self.frame_count = 0  # Initialize frame count
@@ -74,9 +80,11 @@ class ColdCurveNevada():
             elif event.type == PLAYERDEATH:
                 # Here will be a death screen or something
                 self.logger.debug(event.custom_text)
+                self.sound_controller.play_sound(SOUNDS["death"], 0.5)
                 self.running = False
             elif event.type == FINAL_BOSS_KILLED:
                 self.logger.debug(event.custom_text)
+                self.sound_controller.play_sound(SOUNDS["victory"], 1)
 
     def update(self):
 
@@ -95,6 +103,9 @@ class ColdCurveNevada():
         pygame.display.flip()
 
     def main_loop(self):
+
+        # Start the background music
+        self.sound_controller.start_playlist(0.08)
 
         while self.running:
 
