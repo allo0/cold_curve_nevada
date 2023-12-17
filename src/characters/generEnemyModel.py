@@ -1,7 +1,7 @@
 from random import choice
 
-from cold_curve_nevada.configs import logConf
-from configs.entitiesConf import SIMPLE_ENEMY_CONFIG, MISC
+from configs import logConf
+from configs.entitiesConf import ENEMY_CONFIG, MISC
 from src.characters.characterModel import Character
 
 logger = logConf.logger
@@ -16,57 +16,57 @@ class Enemy(Character):
 
         self.image.fill((255, 0, 255))
 
-        self.__speed = SIMPLE_ENEMY_CONFIG["speed"] * self.difficulty_multipliers['speed']
-        self.__health = SIMPLE_ENEMY_CONFIG["health"] * self.difficulty_multipliers['health']
-        self.__damage = SIMPLE_ENEMY_CONFIG["damage"] * self.difficulty_multipliers['damage']
-        self.__exp = SIMPLE_ENEMY_CONFIG["exp"] * self.difficulty_multipliers['exp']
-        self.__points = SIMPLE_ENEMY_CONFIG["points"] * self.difficulty_multipliers['points']
+        self._speed = ENEMY_CONFIG["speed"] * self.difficulty_multipliers['speed']
+        self._health = ENEMY_CONFIG["health"] * self.difficulty_multipliers['health']
+        self._damage = ENEMY_CONFIG["damage"] * self.difficulty_multipliers['damage']
+        self._exp = ENEMY_CONFIG["exp"] * self.difficulty_multipliers['exp']
+        self._points = ENEMY_CONFIG["points"] * self.difficulty_multipliers['points']
 
     @property
     def damage(self):
-        return self.__damage
+        return self._damage
 
     @damage.setter
     def damage(self, value):
-        self.__damage = value
+        self._damage = value
 
     @property
     def speed(self):
-        return self.__speed
+        return self._speed
 
     @speed.setter
     def speed(self, value):
-        self.__speed = value
+        self._speed = value
 
     @property
     def health(self):
-        return self.__health
+        return self._health
 
     @health.setter
     def health(self, value):
-        self.__health = value
+        self._health = value
 
     @property
     def exp(self):
-        return self.__exp
+        return self._exp
 
     @exp.setter
     def exp(self, value):
-        self.__exp = value
+        self._exp = value
 
     @property
     def points(self):
-        return self.__points
+        return self._points
 
     @points.setter
     def points(self, value):
-        self.__points = value
+        self._points = value
 
     def update(self, players):
         super().update()
 
         for player in players:
-            # Move the enemy towards the player (you can customize the behavior)
+            # Move the enemy towards the player
             dx = player.rect.x - self.rect.x
             dy = player.rect.y - self.rect.y
             dist = (dx ** 2 + dy ** 2) ** 0.5  # Calculate distance to the player
@@ -81,4 +81,11 @@ class Enemy(Character):
 
     def attack(self, player):
         # Calculate and apply damage to the player
+        logger.info(f"Player {player.id} current HP: {player.health}")
+
         player.take_damage(self.damage)  # Adjust the damage value as needed
+
+    def hit(self):
+        # just used to override the default is-hit mechanism and the
+        # invincibility after being hit
+        pass
