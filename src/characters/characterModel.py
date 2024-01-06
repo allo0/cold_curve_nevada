@@ -2,8 +2,8 @@ import uuid
 
 import pygame
 
-from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.entitiesConf import GENERIC_CONFIG
+from configs import logConf
+from configs.entitiesConf import GENERIC_CONFIG
 
 logger = logConf.logger
 

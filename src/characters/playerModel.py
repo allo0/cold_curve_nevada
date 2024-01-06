@@ -1,13 +1,13 @@
 import pygame
 
-from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.Events import (
+from configs import logConf
+from configs.Events import (
     PLAYERDEATH,
 
 )
-from cold_curve_nevada.configs.entitiesConf import PLAYER_CONFIG
-from cold_curve_nevada.src.characters.characterModel import Character
-from cold_curve_nevada.src.utils.networkModel import Network
+from configs.entitiesConf import PLAYER_CONFIG
+from src.characters.characterModel import Character
+from src.utils.networkModel import Network
 
 logger = logConf.logger
 

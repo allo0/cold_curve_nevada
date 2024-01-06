@@ -1,6 +1,6 @@
 import sys
 
-from cold_curve_nevada.src.characters.playerModel import Player
+from src.characters.playerModel import Player
 from utils.ColdCurveNevadaModel import ColdCurveNevada
 
 # TODO write unit tests where applicable

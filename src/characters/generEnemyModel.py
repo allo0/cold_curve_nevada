@@ -1,6 +1,6 @@
 from random import choice
 
-from cold_curve_nevada.configs import logConf
+from configs import logConf
 from configs.entitiesConf import SIMPLE_ENEMY_CONFIG, MISC
 from src.characters.characterModel import Character
 

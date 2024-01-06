@@ -5,15 +5,15 @@ from pygame.locals import (
     QUIT,
 )
 
-from cold_curve_nevada.configs import logConf
-from cold_curve_nevada.configs.Events import (
+from configs import logConf
+from configs.Events import (
     PLAYERDEATH,
     ENEMYDEATH,
 )
-from cold_curve_nevada.configs.appConf import Settings
-from cold_curve_nevada.configs.screenLogConf import ScreenLog
-from cold_curve_nevada.src.characters.generEnemyModel import Enemy
-from cold_curve_nevada.src.utils.cameraModel import CameraGroup
+from configs.appConf import Settings
+from configs.screenLogConf import ScreenLog
+from src.characters.generEnemyModel import Enemy
+from src.utils.cameraModel import CameraGroup
 
 
 class ColdCurveNevada():
