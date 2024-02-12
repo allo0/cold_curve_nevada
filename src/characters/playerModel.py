@@ -19,15 +19,15 @@ logger = logConf.logger
 
 class Player(Character):
 
-    def __init__(self, x, y,name, sound_controller, images):
+    def __init__(self, x, y, name, sound_controller, images):
         super().__init__(x, y)
         logger.info(f"Player {self.id} initialized")
-        self.name=name
+        self.name = name
         self.images = images
         self.index = 0
         self.direction = 'still'
         self.image = pygame.image.load(images[f"{self.direction}_{self.index + 1}"]).convert_alpha()
-        self.animation_time = 0.1     # Time each frame is displayed
+        self.animation_time = 0.1  # Time each frame is displayed
         self.current_time = 0
 
         self._speed = PLAYER_CONFIG["speed"]
@@ -37,7 +37,6 @@ class Player(Character):
 
         self._multiplayer = None
         self._network = None
-
 
         # Create an instance of the AoE_Zone class
         self._aoe_zone = AoE_Zone(self.rect)
@@ -190,9 +189,13 @@ class Player(Character):
         if self.network:
             self.network.send({"id": self.id, "x": self.rect.x, "y": self.rect.y, "health": self.health})
 
-    def update(self, enemies, wall_rects, dt):
+    def update(self, enemies, wall_rects, dt, hud):
         super().update()
-
+        hud.update_hp(self.health)
+        hud.update_score(self.total_points)
+        hud.update_xp(self.current_exp, Utils.calculate_experience_custom(level=self.level))
+        hud.update_total_enemies_killed(self.enemies_killed)
+        hud.update_aoe_zone(self.aoe_zone)
         if self.health <= 0:
             player_death_event = pygame.event.Event(PLAYERDEATH, custom_text='YA DEAD')
             pygame.event.post(player_death_event)
@@ -227,8 +230,6 @@ class Player(Character):
             self.current_time = 0
             self.index = (self.index + 1) % 3  # Assuming 3 frames per direction
             self.image = pygame.image.load(self.images[f"{self.direction}_{self.index + 1}"]).convert_alpha()
-
-
 
             # Check for collisions with walls using masks
             # for wall in wall_rects:
@@ -330,7 +331,7 @@ class Player(Character):
             # heal player
             self.heal_player(self.health * PLAYER_CONFIG["level_up_heal"])
             upgrades = ['aoe_radius', 'aoe_attack_speed', 'aoe_damage']
-            weights = [1.3, 1, 1]
+            weights = [1.1, 1.1, 1]
 
             upgrade = random.choices(upgrades, weights, k=1)[0]
 
