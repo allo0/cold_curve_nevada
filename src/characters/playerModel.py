@@ -207,15 +207,19 @@ class Player(Character):
             # Single-player mode controls
             if keys[pygame.K_a]:
                 self.move_player(self, wall_rects, 'left')
+                self.direction='left'
                 key_pressed = True
             if keys[pygame.K_d]:
                 self.move_player(self, wall_rects, 'right')
+                self.direction='right'
                 key_pressed = True
             if keys[pygame.K_w]:
                 self.move_player(self, wall_rects, 'back')
+                self.direction='back'
                 key_pressed = True
             if keys[pygame.K_s]:
                 self.move_player(self, wall_rects, 'front')
+                self.direction='front'
                 key_pressed = True
 
         if not key_pressed:
