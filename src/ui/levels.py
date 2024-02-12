@@ -104,7 +104,7 @@ def level_selection():
                     logger.info(f"Game started with player {username} and difficulty {difficulty}")
 
                     cold_curve_nevada = ColdCurveNevada(player_index=sys.argv[1], multiplayer=False,
-                                                        difficulty=difficulty)
+                                                        difficulty=difficulty-1)
                     player_instance = Player(cold_curve_nevada.player_pos[0], cold_curve_nevada.player_pos[1],
                                              username, cold_curve_nevada.sound_controller, PLAYER)
                     cold_curve_nevada.add_player(player_instance=player_instance)
@@ -124,7 +124,7 @@ def level_selection():
                     logger.info(f"Game started with player {username} and difficulty {difficulty}")
 
                     cold_curve_nevada = ColdCurveNevada(player_index=sys.argv[1], multiplayer=False,
-                                                        difficulty=difficulty)
+                                                        difficulty=difficulty-1)
                     player_instance = Player(cold_curve_nevada.player_pos[0], cold_curve_nevada.player_pos[1],
                                              username, cold_curve_nevada.sound_controller, PLAYER)
                     cold_curve_nevada.add_player(player_instance=player_instance)
@@ -135,7 +135,7 @@ def level_selection():
                     logger.info(f"Game started with player {username} and difficulty {difficulty}")
 
                     cold_curve_nevada = ColdCurveNevada(player_index=sys.argv[1], multiplayer=False,
-                                                        difficulty=difficulty)
+                                                        difficulty=difficulty-1)
                     player_instance = Player(cold_curve_nevada.player_pos[0], cold_curve_nevada.player_pos[1],
                                              username, cold_curve_nevada.sound_controller, PLAYER)
                     cold_curve_nevada.add_player(player_instance=player_instance)

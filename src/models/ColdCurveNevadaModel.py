@@ -15,6 +15,7 @@ from configs.screenLogConf import ScreenLog
 from src.models.backgroundModel import BackgroundGenerator
 from src.models.cameraModel import CameraGroup
 from src.models.soundModel import SoundController
+from src.ui.hud import HUD
 from src.utils.spawnFunctions import Spawner
 
 
@@ -75,6 +76,7 @@ class ColdCurveNevada():
         self.frame_count = 0  # Initialize frame count
         self.running = True
         self.dt = 0
+        self.hud = HUD(self.screen)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -94,7 +96,7 @@ class ColdCurveNevada():
 
     def update(self):
 
-        self.player_group.update(enemies=self.enemies, wall_rects=self.dungeon.wall_rects, dt=self.dt)
+        self.player_group.update(enemies=self.enemies, wall_rects=self.dungeon.wall_rects, dt=self.dt,hud=self.hud)
         self.enemies_group.update(self.players)  # Update enemies based on all players
 
     def render(self):
@@ -109,6 +111,7 @@ class ColdCurveNevada():
             if self.frame_count == Settings.FPS:
                 self.frame_count = 0
 
+        self.hud.draw()
         pygame.display.flip()
 
     def main_loop(self):
