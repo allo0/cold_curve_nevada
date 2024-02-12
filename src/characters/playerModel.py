@@ -19,10 +19,10 @@ logger = logConf.logger
 
 class Player(Character):
 
-    def __init__(self, x, y, sound_controller, images):
+    def __init__(self, x, y,name, sound_controller, images):
         super().__init__(x, y)
         logger.info(f"Player {self.id} initialized")
-
+        self.name=name
         self.images = images
         self.index = 0
         self.direction = 'still'
