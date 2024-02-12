@@ -52,7 +52,18 @@ ENEMIES = {
     "strong": "../assets/images/enemies/head-W.png",
 
 }
+
 TERRAIN = {
     "wall": "../assets/images/terrain/wall.png",
     "floor": "../assets/images/terrain/floor.png",
+}
+
+UI = {
+    "background": "../assets/ui/Background.png",
+    "font": "../assets/ui/font.ttf",
+    "loading_bar": "../assets/ui/Loading Bar.png",
+    "loading_bar_bg": "../assets/ui/Loading Bar Background.png",
+    "play": "../assets/ui/Play Rect.png",
+    "options": "../assets/ui/Options Rect.png",
+    "quit": "../assets/ui/Quit Rect.png",
 }

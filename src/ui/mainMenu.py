@@ -1,56 +1,64 @@
-import pygame
 import sys
-from button import Button
-import levels
 
-pygame.init()
+import pygame
 
-SCREEN = pygame.display.set_mode((1280, 720))
-pygame.display.set_caption("Menu")
-
-BG = pygame.image.load("assets/Background.png")
+from src.ui import levels
+from src.ui.button import Button
+from configs.assetsConf import UI
 
 
-def get_font(size):
-    return pygame.font.Font("assets/font.ttf", size)
+class MainMenu:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((1280, 720))
+        pygame.display.set_caption("Menu")
+        self.bg = pygame.image.load(UI["background"])
+        self.font_path = UI["font"]
+        self.play_button = Button(image=pygame.image.load(UI["play"]), pos=(640, 250),
+                                  text_input="PLAY", font=self.get_font(75), base_color="#d7fcd4",
+                                  hovering_color="White")
+        self.online_button = Button(image=pygame.image.load(UI["options"]), pos=(640, 400),
+                                    text_input="ONLINE", font=self.get_font(75), base_color="#d7fcd4",
+                                    hovering_color="White")
+        self.quit_button = Button(image=pygame.image.load(UI["quit"]), pos=(640, 550),
+                                  text_input="EXIT", font=self.get_font(75), base_color="#d7fcd4",
+                                  hovering_color="White")
+        self.menu_mouse_pos = pygame.mouse.get_pos()
 
+    def get_font(self, size):
+        return pygame.font.Font(self.font_path, size)
 
-def main_menu():
-    while True:
-        SCREEN.blit(BG, (0, 0))
+    def draw_menu(self):
+        menu_text = self.get_font(70).render("Cold Curve Nevada", True, "#b68f40")
+        menu_rect = menu_text.get_rect(center=(640, 100))
+        self.menu_mouse_pos = pygame.mouse.get_pos()
+        self.screen.blit(self.bg, (0, 0))
 
-        MENU_MOUSE_POS = pygame.mouse.get_pos()
+        self.screen.blit(menu_text, menu_rect)
+        # Additional menu drawing logic goes here (e.g., buttons)
+        for button in [self.play_button, self.online_button, self.quit_button]:
+            button.changeColor(self.menu_mouse_pos)
+            button.update(self.screen)
 
-        MENU_TEXT = get_font(70).render("Cold Curve Nevada", True, "#b68f40")
-        MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
-
-        PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 250),
-                             text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-        OPTIONS_BUTTON = Button(image=pygame.image.load("assets/Options Rect.png"), pos=(640, 400),
-                                text_input="ONLINE", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-        QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit Rect.png"), pos=(640, 550),
-                             text_input="EXIT", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-
-        SCREEN.blit(MENU_TEXT, MENU_RECT)
-
-        for button in [PLAY_BUTTON, OPTIONS_BUTTON, QUIT_BUTTON]:
-            button.changeColor(MENU_MOUSE_POS)
-            button.update(SCREEN)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    levels.level_selection()  # Καλεί τη συνάρτηση level_selection() όταν πατηθεί το κουμπί "PLAY"
-                if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    print("Options button clicked")  # Αντίστοιχη λειτουργικότητα για το κουμπί "OPTIONS"
-                if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+    def main_loop(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.play_button.checkForInput(self.menu_mouse_pos):
+                        levels.level_selection()  # Καλεί τη συνάρτηση level_selection() όταν πατηθεί το κουμπί "PLAY"
+                    if self.online_button.checkForInput(self.menu_mouse_pos):
+                        print("Options button clicked")  # Αντίστοιχη λειτουργικότητα για το κουμπί "OPTIONS"
+                    if self.quit_button.checkForInput(self.menu_mouse_pos):
+                        pygame.quit()
+                        sys.exit()
 
-        pygame.display.update()
+            self.draw_menu()
+            pygame.display.update()
 
 
-main_menu()
+if __name__ == "__main__":
+    main_menu = MainMenu()
+    main_menu.main_loop()

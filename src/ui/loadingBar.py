@@ -1,5 +1,6 @@
-# Imports
 import pygame, sys, threading
+
+from configs.assetsConf import UI
 
 pygame.init()
 
@@ -16,11 +17,11 @@ CLOCK = pygame.time.Clock()
 WORK = 10000000
 
 # Loading BG
-LOADING_BG = pygame.image.load("Loading Bar Background.png")
+LOADING_BG = pygame.image.load(UI["loading_bar_bg"])
 LOADING_BG_RECT = LOADING_BG.get_rect(center=(640, 360))
 
 # Loading Bar and variables
-loading_bar = pygame.image.load("Loading Bar.png")
+loading_bar = pygame.image.load(UI["loading_bar"])
 loading_bar_rect = loading_bar.get_rect(midleft=(280, 360))
 loading_finished = False
 loading_progress = 0
@@ -76,7 +77,7 @@ while True:
 
 	import subprocess
 
-	# ...
+
 
 	while True:
 		for event in pygame.event.get():
