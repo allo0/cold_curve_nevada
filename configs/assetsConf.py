@@ -6,17 +6,11 @@ SOUNDS = {
 }
 
 SOUND_LEVEL = {
-    # "victory": 0.5,
-    # "death": 1,
-    # "level_up": 0.5,
-    # "boss_spawn": 0.5,
-    # "ambient": 0.08,
-    "victory": 0,
-    "death": 0,
-    "level_up": 0,
-    "boss_spawn": 0,
-    "ambient": 0,
-
+    "victory": 0.5,
+    "death": 1,
+    "level_up": 0.5,
+    "boss_spawn": 0.5,
+    "ambient": 0.08,
 }
 
 MUSIC_PLAYLIST = [

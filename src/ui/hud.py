@@ -26,6 +26,12 @@ class HUD:
 
         self.aoe_zone=None
         self.total_enemies_killed = 0  # Counter for total enemies killed
+        self.current_level = 1  # Initialize current level
+        self.level_pos = (10, self.xp_bar_pos[1] - 30)  # Position for the level text
+
+
+    def update_level(self, level):
+        self.current_level = level
 
     def update_total_enemies_killed(self, total_enemies_killed):
         self.total_enemies_killed = total_enemies_killed
@@ -46,6 +52,10 @@ class HUD:
 
     def update_score(self, score):
         self.score = score
+
+    def draw_level(self):
+        level_text = self.font.render(f'Level: {self.current_level}', True, (255, 255, 255))
+        self.screen.blit(level_text, self.level_pos)
 
     def draw_health_bar(self):
         # Draw background of the health bar
@@ -90,7 +100,7 @@ class HUD:
         self.draw_health_bar()
         # Draw the exp bar
         self.draw_xp_bar()
-
+        self.draw_level()
         self.draw_aoe_zone_stats()
 
         # Display Score at the top left

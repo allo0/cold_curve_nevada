@@ -196,6 +196,8 @@ class Player(Character):
         hud.update_xp(self.current_exp, Utils.calculate_experience_custom(level=self.level))
         hud.update_total_enemies_killed(self.enemies_killed)
         hud.update_aoe_zone(self.aoe_zone)
+        hud.update_level(self.level)
+
         if self.health <= 0:
             player_death_event = pygame.event.Event(PLAYERDEATH, custom_text='YA DEAD')
             pygame.event.post(player_death_event)
@@ -207,19 +209,19 @@ class Player(Character):
             # Single-player mode controls
             if keys[pygame.K_a]:
                 self.move_player(self, wall_rects, 'left')
-                self.direction='left'
+                self.direction = 'left'
                 key_pressed = True
             if keys[pygame.K_d]:
                 self.move_player(self, wall_rects, 'right')
-                self.direction='right'
+                self.direction = 'right'
                 key_pressed = True
             if keys[pygame.K_w]:
                 self.move_player(self, wall_rects, 'back')
-                self.direction='back'
+                self.direction = 'back'
                 key_pressed = True
             if keys[pygame.K_s]:
                 self.move_player(self, wall_rects, 'front')
-                self.direction='front'
+                self.direction = 'front'
                 key_pressed = True
 
         if not key_pressed:
@@ -230,7 +232,6 @@ class Player(Character):
             self.current_time = 0
             self.index = (self.index + 1) % 3  # Assuming 3 frames per direction
             self.image = pygame.image.load(self.images[f"{self.direction}_{self.index + 1}"]).convert_alpha()
-
 
             # else:
             #     # Multiplayer mode controls
