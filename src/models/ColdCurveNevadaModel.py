@@ -97,8 +97,10 @@ class ColdCurveNevada():
     def update(self):
 
         self.player_group.update(enemies=self.enemies, wall_rects=self.dungeon.wall_rects, dt=self.dt, hud=self.hud)
+        # self.enemies_group.update(players=self.players,
+        #                           obstacles=self.dungeon.wall_rects)  # Update enemies based on all players
         self.enemies_group.update(players=self.players,
-                                  obstacles=self.dungeon.wall_rects)  # Update enemies based on all players
+                                 )  # Update enemies based on all players
 
     def render(self):
         self.screen.fill((0, 0, 0))  # Fill with black
