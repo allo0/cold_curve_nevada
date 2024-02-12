@@ -12,18 +12,23 @@ from cold_curve_nevada.src.characters.characterModel import Character
 from cold_curve_nevada.src.models.attacksModel import AoE_Zone
 from cold_curve_nevada.src.models.networkModel import Network
 from cold_curve_nevada.src.utils.utilFunctions import Utils
-from configs.assetsConf import SOUNDS
+from configs.assetsConf import SOUNDS, SOUND_LEVEL
 
 logger = logConf.logger
 
 
 class Player(Character):
 
-    def __init__(self, x, y, sound_controller):
+    def __init__(self, x, y,name, sound_controller, images):
         super().__init__(x, y)
         logger.info(f"Player {self.id} initialized")
-
-        self.image.fill((255, 255, 0))
+        self.name=name
+        self.images = images
+        self.index = 0
+        self.direction = 'still'
+        self.image = pygame.image.load(images[f"{self.direction}_{self.index + 1}"]).convert_alpha()
+        self.animation_time = 0.1     # Time each frame is displayed
+        self.current_time = 0
 
         self._speed = PLAYER_CONFIG["speed"]
         self._health = PLAYER_CONFIG["health"]
@@ -33,7 +38,6 @@ class Player(Character):
         self._multiplayer = None
         self._network = None
 
-        # Inner class for semi-transparent area
 
         # Create an instance of the AoE_Zone class
         self._aoe_zone = AoE_Zone(self.rect)
@@ -186,7 +190,7 @@ class Player(Character):
         if self.network:
             self.network.send({"id": self.id, "x": self.rect.x, "y": self.rect.y, "health": self.health})
 
-    def update(self, enemies):
+    def update(self, enemies, wall_rects, dt):
         super().update()
 
         if self.health <= 0:
@@ -195,17 +199,62 @@ class Player(Character):
 
         # Implement character movement and actions here
         keys = pygame.key.get_pressed()
-
+        key_pressed = False
         if not self.multiplayer:
             # Single-player mode controls
             if keys[pygame.K_a]:
                 self.rect.x -= self.speed
+                self.direction = "left"
+                key_pressed = True
             if keys[pygame.K_d]:
                 self.rect.x += self.speed
+                self.direction = "right"
+                key_pressed = True
             if keys[pygame.K_w]:
                 self.rect.y -= self.speed
+                self.direction = "back"
+                key_pressed = True
             if keys[pygame.K_s]:
                 self.rect.y += self.speed
+                self.direction = "front"
+                key_pressed = True
+
+        if not key_pressed:
+            self.direction = "still"
+
+        self.current_time += dt
+        if self.current_time >= self.animation_time:
+            self.current_time = 0
+            self.index = (self.index + 1) % 3  # Assuming 3 frames per direction
+            self.image = pygame.image.load(self.images[f"{self.direction}_{self.index + 1}"]).convert_alpha()
+
+
+
+            # Check for collisions with walls using masks
+            # for wall in wall_rects:
+            #     offset_x = wall.rect.x - self.rect.x
+            #     offset_y = wall.rect.y - self.rect.y
+            #     if self.mask.overlap(wall.mask, (offset_x, offset_y)):
+            #         # Handle collision
+            #         # For example, stop movement or bounce back
+            #         break
+            # # Normalize direction
+            # if direction.length() > 0:
+            #     direction = direction.normalize()
+            #
+            # # Raycasting for collision detection
+            # # player_center = pygame.math.Vector2(self.rect.center)
+            # # max_distance = self.speed
+            # # new_pos = self.cast_ray(player_center, direction, wall_rects, max_distance)
+            # #
+            # # # Update player position based on raycast
+            # # self.rect.center = new_pos
+            #
+            # max_distance = self.speed
+            # # Cast the ray to find the new position
+            # new_pos = self.cast_ray(direction, wall_rects, max_distance)
+            # # Update the player's position
+            # self.rect.center = new_pos
 
             # else:
             #     # Multiplayer mode controls
@@ -276,7 +325,7 @@ class Player(Character):
         if exp_need_for_level_up <= self.current_exp:
             self.level += 1
 
-            self.sound_controller.play_sound(SOUNDS["level_up"], 0.5)
+            self.sound_controller.play_sound(SOUNDS["level_up"], SOUND_LEVEL["level_up"])
 
             # heal player
             self.heal_player(self.health * PLAYER_CONFIG["level_up_heal"])
@@ -317,3 +366,80 @@ class Player(Character):
                         del enemy
                         logger.info(
                             f"Player {self.id} enemies killed: {self.enemies_killed} and total points: {self.total_points}")
+
+    # def line_intersect(a1, a2, b1, b2):
+    #     """
+    #     Determines if the line segment a1a2 intersects with line segment b1b2.
+    #
+    #     Args:
+    #         a1, a2 (pygame.Vector2): Endpoints of the first line segment.
+    #         b1, b2 (pygame.Vector2): Endpoints of the second line segment.
+    #
+    #     Returns:
+    #         bool: True if the segments intersect, False otherwise.
+    #     """
+    #     # Calculate differences
+    #     da = a2 - a1
+    #     db = b2 - b1
+    #     dp = a1 - b1
+    #
+    #     dap = pygame.Vector2(-da.y, da.x)
+    #     denom = dap.dot(db)
+    #
+    #     if denom == 0:
+    #         return False  # Parallel lines
+    #
+    #     num = dap.dot(dp)
+    #     intersection = num / denom
+    #
+    #     # Check if intersection point is on both line segments
+    #     if intersection < 0 or intersection > 1:
+    #         return False
+    #
+    #     # Calculate the intersection point on the first line
+    #     point_on_a = a1 + da * intersection
+    #
+    #     # Check if this point is within the segment b1b2
+    #     return b1.x <= point_on_a.x <= b2.x or b1.y <= point_on_a.y <= b2.y
+    #
+    # def raycast(player_pos, direction, wall_rects):
+    #     """
+    #     Casts a ray from the player's position in the given direction to check for collisions with wall rectangles.
+    #
+    #     Args:
+    #         player_pos (tuple): The player's current position (x, y).
+    #         direction (tuple): The normalized direction vector of the ray (dx, dy).
+    #         wall_rects (list): A list of pygame.Rect objects representing walls.
+    #
+    #     Returns:
+    #         bool: True if the ray intersects with any wall, False otherwise.
+    #     """
+    #     # Convert player position and direction to pygame Vector2 for easier calculations
+    #     player_vector = Vector2(player_pos)
+    #     direction_vector = Vector2(direction).normalize()  # Ensure the direction vector is normalized
+    #
+    #     # Define a large enough distance for the ray to ensure it reaches the walls
+    #     ray_distance = 1000  # This value may need adjustment based on your game's scale
+    #
+    #     # Calculate the ray's end point
+    #     ray_end = player_vector + direction_vector * ray_distance
+    #
+    #     # Iterate through each wall rectangle to check for intersection
+    #     for wall_rect in wall_rects:
+    #         # Create lines for each edge of the rectangle
+    #         edges = [
+    #             (Vector2(wall_rect.topleft), Vector2(wall_rect.topright)),
+    #             (Vector2(wall_rect.topright), Vector2(wall_rect.bottomright)),
+    #             (Vector2(wall_rect.bottomright), Vector2(wall_rect.bottomleft)),
+    #             (Vector2(wall_rect.bottomleft), Vector2(wall_rect.topleft)),
+    #         ]
+    #
+    #         # Check each edge for intersection with the ray
+    #         for start, end in edges:
+    #             if line_intersect(player_vector, ray_end, start, end):
+    #                 return True  # Intersection found
+    #
+    #     # No intersection found
+    #     return False
+    #
+    #

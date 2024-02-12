@@ -9,8 +9,10 @@ from configs import logConf
 from configs.Events import (
     PLAYERDEATH, FINAL_BOSS_KILLED, )
 from configs.appConf import Settings
-from configs.assetsConf import SOUNDS
+from configs.assetsConf import SOUNDS, SOUND_LEVEL
+from configs.entitiesConf import DUNGEON
 from configs.screenLogConf import ScreenLog
+from src.models.backgroundModel import BackgroundGenerator
 from src.models.cameraModel import CameraGroup
 from src.models.soundModel import SoundController
 from src.utils.spawnFunctions import Spawner
@@ -33,8 +35,11 @@ class ColdCurveNevada():
         # init logger
         self.logger = logConf.logger
 
-        # Create an instance of BackgroundGenerator
-        # self.background = BackgroundGenerator()
+        # Initialize the RandomDungeon and generate the dungeon layout
+        self.dungeon = BackgroundGenerator(DUNGEON['width'], DUNGEON['height'])
+        self.player_pos = self.dungeon.generate_dungeon()
+
+        self.static_sprites = None
 
         # Initialize the SoundController
         self.sound_controller = SoundController()
@@ -69,6 +74,7 @@ class ColdCurveNevada():
         self.screen_logs = ScreenLog()
         self.frame_count = 0  # Initialize frame count
         self.running = True
+        self.dt = 0
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -80,22 +86,25 @@ class ColdCurveNevada():
             elif event.type == PLAYERDEATH:
                 # Here will be a death screen or something
                 self.logger.debug(event.custom_text)
-                self.sound_controller.play_sound(SOUNDS["death"], 0.5)
+                self.sound_controller.play_sound(SOUNDS["death"], SOUND_LEVEL["death"])
                 self.running = False
             elif event.type == FINAL_BOSS_KILLED:
                 self.logger.debug(event.custom_text)
-                self.sound_controller.play_sound(SOUNDS["victory"], 1)
+                self.sound_controller.play_sound(SOUNDS["victory"], SOUND_LEVEL["victory"])
 
     def update(self):
 
-        self.player_group.update(self.enemies)
+        self.player_group.update(enemies=self.enemies, wall_rects=self.dungeon.wall_rects, dt=self.dt)
         self.enemies_group.update(self.players)  # Update enemies based on all players
 
     def render(self):
         self.screen.fill((0, 0, 0))  # Fill with black
-        self.all_sprites.custom_draw(self.players)
+        # Render the static dungeon (not affected by the camera)
+        for sprite in self.static_sprites:
+            self.screen.blit(sprite.image, sprite.rect)
 
         for player in self.players:
+            self.all_sprites.custom_draw(player)
             self.frame_count += 1
             if self.frame_count == Settings.FPS:
                 self.frame_count = 0
@@ -104,8 +113,11 @@ class ColdCurveNevada():
 
     def main_loop(self):
 
+        self.dt = self.clock.tick(60) / 1000
+        self.static_sprites = self.dungeon.create_static_sprites()
+
         # Start the background music
-        self.sound_controller.start_playlist(0.08)
+        self.sound_controller.start_playlist(SOUND_LEVEL["ambient"])
 
         while self.running:
 

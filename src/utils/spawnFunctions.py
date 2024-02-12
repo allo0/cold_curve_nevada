@@ -1,8 +1,10 @@
 import random
 import time
 
+import pygame
+
 from configs import logConf
-from configs.assetsConf import SOUNDS
+from configs.assetsConf import SOUNDS, ENEMIES
 from configs.entitiesConf import SPAWN_PATTERNS, BOSS_SPAWN_CONDITIONS
 from src.characters.enemiesModel import FastEnemy, TankEnemy, StrongEnemy, FirstBossEnemy, SecondBossEnemy
 from src.characters.generEnemyModel import Enemy
@@ -14,17 +16,17 @@ class EnemyFactory:
     @staticmethod
     def create_enemy(enemy_type, difficulty):
         if enemy_type == "generic":
-            return Enemy(difficulty)
+            return Enemy(difficulty, pygame.image.load(ENEMIES["generic"]).convert_alpha())
         elif enemy_type == "fast":
-            return FastEnemy(difficulty)
+            return FastEnemy(difficulty, pygame.image.load(ENEMIES["fast"]).convert_alpha())
         elif enemy_type == "tank":
-            return TankEnemy(difficulty)
+            return TankEnemy(difficulty, pygame.image.load(ENEMIES["tank"]).convert_alpha())
         elif enemy_type == "strong":
-            return StrongEnemy(difficulty)
+            return StrongEnemy(difficulty, pygame.image.load(ENEMIES["strong"]).convert_alpha())
         elif enemy_type == "first_boss":
-            return FirstBossEnemy(difficulty)
+            return FirstBossEnemy(difficulty, pygame.image.load(ENEMIES["first_boss"]).convert_alpha())
         elif enemy_type == "second_boss":
-            return SecondBossEnemy(difficulty)
+            return SecondBossEnemy(difficulty, pygame.image.load(ENEMIES["second_boss"]).convert_alpha())
         # ... handle other enemy types
         else:
             raise ValueError("Unknown enemy type")
