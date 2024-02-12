@@ -206,20 +206,16 @@ class Player(Character):
         if not self.multiplayer:
             # Single-player mode controls
             if keys[pygame.K_a]:
-                self.rect.x -= self.speed
-                self.direction = "left"
+                self.move_player(self, wall_rects, 'left')
                 key_pressed = True
             if keys[pygame.K_d]:
-                self.rect.x += self.speed
-                self.direction = "right"
+                self.move_player(self, wall_rects, 'right')
                 key_pressed = True
             if keys[pygame.K_w]:
-                self.rect.y -= self.speed
-                self.direction = "back"
+                self.move_player(self, wall_rects, 'back')
                 key_pressed = True
             if keys[pygame.K_s]:
-                self.rect.y += self.speed
-                self.direction = "front"
+                self.move_player(self, wall_rects, 'front')
                 key_pressed = True
 
         if not key_pressed:
@@ -231,31 +227,6 @@ class Player(Character):
             self.index = (self.index + 1) % 3  # Assuming 3 frames per direction
             self.image = pygame.image.load(self.images[f"{self.direction}_{self.index + 1}"]).convert_alpha()
 
-            # Check for collisions with walls using masks
-            # for wall in wall_rects:
-            #     offset_x = wall.rect.x - self.rect.x
-            #     offset_y = wall.rect.y - self.rect.y
-            #     if self.mask.overlap(wall.mask, (offset_x, offset_y)):
-            #         # Handle collision
-            #         # For example, stop movement or bounce back
-            #         break
-            # # Normalize direction
-            # if direction.length() > 0:
-            #     direction = direction.normalize()
-            #
-            # # Raycasting for collision detection
-            # # player_center = pygame.math.Vector2(self.rect.center)
-            # # max_distance = self.speed
-            # # new_pos = self.cast_ray(player_center, direction, wall_rects, max_distance)
-            # #
-            # # # Update player position based on raycast
-            # # self.rect.center = new_pos
-            #
-            # max_distance = self.speed
-            # # Cast the ray to find the new position
-            # new_pos = self.cast_ray(direction, wall_rects, max_distance)
-            # # Update the player's position
-            # self.rect.center = new_pos
 
             # else:
             #     # Multiplayer mode controls
@@ -368,79 +339,22 @@ class Player(Character):
                         logger.info(
                             f"Player {self.id} enemies killed: {self.enemies_killed} and total points: {self.total_points}")
 
-    # def line_intersect(a1, a2, b1, b2):
-    #     """
-    #     Determines if the line segment a1a2 intersects with line segment b1b2.
-    #
-    #     Args:
-    #         a1, a2 (pygame.Vector2): Endpoints of the first line segment.
-    #         b1, b2 (pygame.Vector2): Endpoints of the second line segment.
-    #
-    #     Returns:
-    #         bool: True if the segments intersect, False otherwise.
-    #     """
-    #     # Calculate differences
-    #     da = a2 - a1
-    #     db = b2 - b1
-    #     dp = a1 - b1
-    #
-    #     dap = pygame.Vector2(-da.y, da.x)
-    #     denom = dap.dot(db)
-    #
-    #     if denom == 0:
-    #         return False  # Parallel lines
-    #
-    #     num = dap.dot(dp)
-    #     intersection = num / denom
-    #
-    #     # Check if intersection point is on both line segments
-    #     if intersection < 0 or intersection > 1:
-    #         return False
-    #
-    #     # Calculate the intersection point on the first line
-    #     point_on_a = a1 + da * intersection
-    #
-    #     # Check if this point is within the segment b1b2
-    #     return b1.x <= point_on_a.x <= b2.x or b1.y <= point_on_a.y <= b2.y
-    #
-    # def raycast(player_pos, direction, wall_rects):
-    #     """
-    #     Casts a ray from the player's position in the given direction to check for collisions with wall rectangles.
-    #
-    #     Args:
-    #         player_pos (tuple): The player's current position (x, y).
-    #         direction (tuple): The normalized direction vector of the ray (dx, dy).
-    #         wall_rects (list): A list of pygame.Rect objects representing walls.
-    #
-    #     Returns:
-    #         bool: True if the ray intersects with any wall, False otherwise.
-    #     """
-    #     # Convert player position and direction to pygame Vector2 for easier calculations
-    #     player_vector = Vector2(player_pos)
-    #     direction_vector = Vector2(direction).normalize()  # Ensure the direction vector is normalized
-    #
-    #     # Define a large enough distance for the ray to ensure it reaches the walls
-    #     ray_distance = 1000  # This value may need adjustment based on your game's scale
-    #
-    #     # Calculate the ray's end point
-    #     ray_end = player_vector + direction_vector * ray_distance
-    #
-    #     # Iterate through each wall rectangle to check for intersection
-    #     for wall_rect in wall_rects:
-    #         # Create lines for each edge of the rectangle
-    #         edges = [
-    #             (Vector2(wall_rect.topleft), Vector2(wall_rect.topright)),
-    #             (Vector2(wall_rect.topright), Vector2(wall_rect.bottomright)),
-    #             (Vector2(wall_rect.bottomright), Vector2(wall_rect.bottomleft)),
-    #             (Vector2(wall_rect.bottomleft), Vector2(wall_rect.topleft)),
-    #         ]
-    #
-    #         # Check each edge for intersection with the ray
-    #         for start, end in edges:
-    #             if line_intersect(player_vector, ray_end, start, end):
-    #                 return True  # Intersection found
-    #
-    #     # No intersection found
-    #     return False
-    #
-    #
+    def move_player(self, player, obstacles, direction):
+        """Move the player if no collision is detected in the intended direction."""
+        original_position = player.rect.copy()  # Copy the original position
+
+        # Update player's position based on direction
+        if direction == 'right':
+            player.rect.x += player.speed
+        elif direction == 'left':
+            player.rect.x -= player.speed
+        elif direction == 'back':
+            player.rect.y -= player.speed
+        elif direction == 'front':
+            player.rect.y += player.speed
+
+        # Check for collisions with any obstacles
+        for obstacle in obstacles:
+            if player.rect.colliderect(obstacle):
+                player.rect = original_position  # Reset to original position if collision detected
+                break  # Exit the loop early if a collision is found

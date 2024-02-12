@@ -33,7 +33,7 @@ def go_back_to_main_menu():
 
 def level_selection():
     username = ""
-    difficulty = 1
+    difficulty = 2
 
     # level_slider = pygame.Rect(200, 400, 880, 10)
     # slider_button = pygame.Rect(200 + (difficulty - 1) * 176, 390, 20, 30)
