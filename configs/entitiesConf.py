@@ -1,3 +1,8 @@
+DUNGEON = {
+    "width": 54,
+    "height": 23,
+    "tile": 32,
+}
 GENERIC_CONFIG = {
     "speed": 5,
     "health": 10,
@@ -5,7 +10,7 @@ GENERIC_CONFIG = {
 }
 
 PLAYER_CONFIG = {
-    "speed": 30,
+    "speed": 5,
     "health": 100,
     "level_up_heal": 0.15,
     "iframes": 240,

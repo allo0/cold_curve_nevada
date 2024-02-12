@@ -1,5 +1,7 @@
 from random import choice
 
+import pygame
+
 from configs import logConf
 from configs.entitiesConf import ENEMY_CONFIG, MISC
 from src.characters.characterModel import Character
@@ -8,13 +10,14 @@ logger = logConf.logger
 
 
 class Enemy(Character):
-    def __init__(self, difficulty):
+    def __init__(self, difficulty, image):
         spawn_coordinates = choice(MISC["spawns"])
         self.difficulty_multipliers = MISC["difficulty_multipliers"][difficulty]
 
         super().__init__(spawn_coordinates[0], spawn_coordinates[1])
 
-        self.image.fill((255, 0, 255))
+        self.image = image
+        self.image=pygame.transform.scale(self.image, (40,40))
 
         self._speed = ENEMY_CONFIG["speed"] * self.difficulty_multipliers['speed']
         self._health = ENEMY_CONFIG["health"] * self.difficulty_multipliers['health']
