@@ -7,18 +7,20 @@ from pygame.locals import (
 
 from configs import logConf
 from configs.Events import (
-    PLAYERDEATH,
-    ENEMYDEATH,
-)
+    PLAYERDEATH, FINAL_BOSS_KILLED, )
 from configs.appConf import Settings
+from configs.assetsConf import SOUNDS, SOUND_LEVEL
+from configs.entitiesConf import DUNGEON
 from configs.screenLogConf import ScreenLog
-from src.characters.generEnemyModel import Enemy
-from src.utils.cameraModel import CameraGroup
+from src.models.backgroundModel import BackgroundGenerator
+from src.models.cameraModel import CameraGroup
+from src.models.soundModel import SoundController
+from src.utils.spawnFunctions import Spawner
 
 
 class ColdCurveNevada():
 
-    def __init__(self, difficulty, player_index, multiplayer: False) -> None:
+    def __init__(self, difficulty: 1, player_index: 0, multiplayer: False) -> None:
         super().__init__()
         pygame.init()  # Initialize Pygame
 
@@ -33,8 +35,14 @@ class ColdCurveNevada():
         # init logger
         self.logger = logConf.logger
 
-        # Create an instance of BackgroundGenerator
-        # self.background = BackgroundGenerator()
+        # Initialize the RandomDungeon and generate the dungeon layout
+        self.dungeon = BackgroundGenerator(DUNGEON['width'], DUNGEON['height'])
+        self.player_pos = self.dungeon.generate_dungeon()
+
+        self.static_sprites = None
+
+        # Initialize the SoundController
+        self.sound_controller = SoundController()
 
         # Set if it is multiplayer or not
         self.multiplayer = multiplayer
@@ -46,6 +54,11 @@ class ColdCurveNevada():
         self.players = []
         self.player_index = player_index
 
+        self.total_enemies_killed = 0
+
+        # Game difficulty
+        self.difficulty = difficulty
+
         # Create sprite groups
         self.player_group = pygame.sprite.Group()  # Create a group for the player
         self.enemies_group = pygame.sprite.Group()  # Create a group for enemies
@@ -54,17 +67,14 @@ class ColdCurveNevada():
         self.all_sprites = CameraGroup()
 
         self.enemies = pygame.sprite.Group()
-        for _ in range(2):  # Create 5 enemy characters (you can adjust the number)
-            enemy = Enemy(difficulty)
-            self.logger.info(f"Instantiated {enemy.id}")
-            self.enemies.add(enemy)
 
-        self.enemies_group.add(self.enemies)  # Add the enemies to the group
-        self.all_sprites.add(self.enemies)
+        self.spawner = Spawner(sprite_group=self.all_sprites, enemy_group=self.enemies_group, player=self.players,
+                               sound_controller=self.sound_controller)
 
         self.screen_logs = ScreenLog()
         self.frame_count = 0  # Initialize frame count
         self.running = True
+        self.dt = 0
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -75,22 +85,26 @@ class ColdCurveNevada():
                 self.running = False
             elif event.type == PLAYERDEATH:
                 # Here will be a death screen or something
-                self.logger.info(event.custom_text)
+                self.logger.debug(event.custom_text)
+                self.sound_controller.play_sound(SOUNDS["death"], SOUND_LEVEL["death"])
                 self.running = False
-            #     NOT USED YET (if ever)
-            # elif event.type == ENEMYDEATH:
-            #     # Here will be a death screen or something
-            #     self.logger.info(event.custom_text)
+            elif event.type == FINAL_BOSS_KILLED:
+                self.logger.debug(event.custom_text)
+                self.sound_controller.play_sound(SOUNDS["victory"], SOUND_LEVEL["victory"])
 
     def update(self):
-        self.player_group.update(self.enemies)
+
+        self.player_group.update(enemies=self.enemies, wall_rects=self.dungeon.wall_rects, dt=self.dt)
         self.enemies_group.update(self.players)  # Update enemies based on all players
 
     def render(self):
         self.screen.fill((0, 0, 0))  # Fill with black
-        self.all_sprites.custom_draw(self.players)
+        # Render the static dungeon (not affected by the camera)
+        for sprite in self.static_sprites:
+            self.screen.blit(sprite.image, sprite.rect)
 
         for player in self.players:
+            self.all_sprites.custom_draw(player)
             self.frame_count += 1
             if self.frame_count == Settings.FPS:
                 self.frame_count = 0
@@ -98,9 +112,24 @@ class ColdCurveNevada():
         pygame.display.flip()
 
     def main_loop(self):
+
+        self.dt = self.clock.tick(60) / 1000
+        self.static_sprites = self.dungeon.create_static_sprites()
+
+        # Start the background music
+        self.sound_controller.start_playlist(SOUND_LEVEL["ambient"])
+
         while self.running:
+
             self.update()
             self.handle_events()
+
+            # Spawn and add new enemies to the main sprite group
+            new_enemies = self.spawner.spawn_enemies(difficulty=self.difficulty)
+            for enemy in new_enemies:
+                self.enemies.add(enemy)
+            self.enemies_group.add(self.enemies)  # Add the enemies to the group
+            self.all_sprites.add(self.enemies)
 
             if self.multiplayer:
                 # Send and receive player data through the network
@@ -112,6 +141,8 @@ class ColdCurveNevada():
                     other_player_data = self.network.send("")  # Sending an empty message just to receive data
                     if other_player_data is not None and idx != self.network.get_player_index():
                         player.update_from_data(other_player_data)
+
+            # Get total kills for all players
 
             self.render()
             self.clock.tick(Settings.FPS)
@@ -135,4 +166,5 @@ class ColdCurveNevada():
         # self.network.send(player_data)
         self.player_group.add(player_instance)  # Add the player to the group
         self.all_sprites.add(player_instance.aoe_zone)
+        # self.all_sprites.add(player_instance.line_of_doom)
         self.all_sprites.add(player_instance)

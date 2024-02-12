@@ -10,9 +10,9 @@ class Settings:
     ENABLE_LOGS = True
 
     # Define constants for the game_screen width and height
-    SCREEN_WIDTH = pyautogui.size().width / 2
-    SCREEN_HEIGHT = pyautogui.size().height / 2
-    RESOLUTION = (SCREEN_WIDTH, SCREEN_HEIGHT)
+    SCREEN_WIDTH: int = pyautogui.size().width / 2
+    SCREEN_HEIGHT: int = pyautogui.size().height / 2
+    RESOLUTION: tuple = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
     FPS = 60
 

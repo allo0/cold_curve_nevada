@@ -1,2 +1,0 @@
-class BackgroundGenerator:
-    pass
