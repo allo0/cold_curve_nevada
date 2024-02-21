@@ -15,6 +15,7 @@ from configs.screenLogConf import ScreenLog
 from src.models.backgroundModel import BackgroundGenerator
 from src.models.cameraModel import CameraGroup
 from src.models.soundModel import SoundController
+from src.ui.endMenu import GameEndScreen
 from src.ui.hud import HUD
 from src.utils.spawnFunctions import Spawner
 
@@ -29,7 +30,7 @@ class ColdCurveNevada():
         self.screen = pygame.display.set_mode(Settings.RESOLUTION)
         pygame.display.set_caption(Settings.PROJECT_NAME)
         self.clock = pygame.time.Clock()
-
+        self.window = pygame.display
         if Settings.ENABLE_LOGS:
             logConf.configure_logging()
 
@@ -89,10 +90,17 @@ class ColdCurveNevada():
                 # Here will be a death screen or something
                 self.logger.debug(event.custom_text)
                 self.sound_controller.play_sound(SOUNDS["death"], SOUND_LEVEL["death"])
+                self.sound_controller.pause_music()
                 self.running = False
+                game_end_screen = GameEndScreen(end_type="Retry", end_text="You failed")
+                game_end_screen.run()
             elif event.type == FINAL_BOSS_KILLED:
                 self.logger.debug(event.custom_text)
                 self.sound_controller.play_sound(SOUNDS["victory"], SOUND_LEVEL["victory"])
+                self.sound_controller.pause_music()
+                self.running = False
+                game_end_screen = GameEndScreen(end_type="Play Again", end_text="Congratulations")
+                game_end_screen.run()
 
     def update(self):
 

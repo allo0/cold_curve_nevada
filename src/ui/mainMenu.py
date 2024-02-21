@@ -6,6 +6,8 @@ from configs.Events import PLAYERDEATH
 from configs.assetsConf import UI
 from src.ui import levels, scores
 from src.ui.button import Button
+from src.ui.levels import LevelSelectionMenu
+from src.ui.scores import ScoreMenu
 
 
 class MainMenu:
@@ -52,9 +54,11 @@ class MainMenu:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.play_button.checkForInput(self.menu_mouse_pos):
-                        levels.level_selection()  # Καλεί τη συνάρτηση level_selection() όταν πατηθεί το κουμπί "PLAY"
+                        level_selection_screen = LevelSelectionMenu()
+                        level_selection_screen.run()
                     if self.scores_button.checkForInput(self.menu_mouse_pos):
-                        scores.score_selection()
+                        score_menu = ScoreMenu()
+                        score_menu.run()
                     if self.online_button.checkForInput(self.menu_mouse_pos):
                         print("Options button clicked")  # Αντίστοιχη λειτουργικότητα για το κουμπί "OPTIONS"
                     if self.quit_button.checkForInput(self.menu_mouse_pos):

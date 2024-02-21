@@ -335,7 +335,7 @@ class Player(Character):
                     enemy_health = self.attack(enemy)
                     self.aoe_zone.last_attack_time = Utils.get_curr_time()
                     if enemy_health <= 0:
-                        if enemy.id == "first_boss":
+                        if enemy.id == "second_boss":
                             final_boss_killed = pygame.event.Event(FINAL_BOSS_KILLED,
                                                                    custom_text='Killed the final boss')
                             self.score_data_handler.write_data(
@@ -344,8 +344,6 @@ class Player(Character):
                                             total_points=self.total_points,
                                             level=self.level))
 
-                            test = self.score_data_handler.read_data()
-                            logger.debug(f"{test}")
                             pygame.event.post(final_boss_killed)
 
                         enemy.kill()
