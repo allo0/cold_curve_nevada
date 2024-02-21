@@ -1,6 +1,7 @@
 import random
 
 import pygame
+from pydantic import BaseModel
 
 from cold_curve_nevada.configs import logConf
 from cold_curve_nevada.configs.Events import (
@@ -12,7 +13,9 @@ from cold_curve_nevada.src.characters.characterModel import Character
 from cold_curve_nevada.src.models.attacksModel import AoE_Zone
 from cold_curve_nevada.src.models.networkModel import Network
 from cold_curve_nevada.src.utils.utilFunctions import Utils
+from configs.appConf import Settings
 from configs.assetsConf import SOUNDS, SOUND_LEVEL
+from src.utils.dataHandler import DataHandler
 
 logger = logConf.logger
 
@@ -21,8 +24,8 @@ class Player(Character):
 
     def __init__(self, x, y, name, sound_controller, images):
         super().__init__(x, y)
-        logger.info(f"Player {self.id} initialized")
         self.name = name
+        logger.info(f"Player {self.id} with name {self.name} initialized")
         self.images = images
         self.index = 0
         self.direction = 'still'
@@ -46,6 +49,7 @@ class Player(Character):
         self._current_exp = 0
         self._enemies_killed = 0
         self._total_points = 0
+        self.score_data_handler = DataHandler(Settings.SCORES)
 
         self.sound_controller = sound_controller
 
@@ -331,9 +335,17 @@ class Player(Character):
                     enemy_health = self.attack(enemy)
                     self.aoe_zone.last_attack_time = Utils.get_curr_time()
                     if enemy_health <= 0:
-                        if enemy.id == "second_boss":
+                        if enemy.id == "first_boss":
                             final_boss_killed = pygame.event.Event(FINAL_BOSS_KILLED,
                                                                    custom_text='Killed the final boss')
+                            self.score_data_handler.write_data(
+                                PlayerScore(player_name=self.name,
+                                            enemies_killed=self.enemies_killed,
+                                            total_points=self.total_points,
+                                            level=self.level))
+
+                            test = self.score_data_handler.read_data()
+                            logger.debug(f"{test}")
                             pygame.event.post(final_boss_killed)
 
                         enemy.kill()
@@ -363,3 +375,10 @@ class Player(Character):
             if player.rect.colliderect(obstacle):
                 player.rect = original_position  # Reset to original position if collision detected
                 break  # Exit the loop early if a collision is found
+
+
+class PlayerScore(BaseModel):
+    player_name: str
+    enemies_killed: int
+    total_points: float
+    level: int

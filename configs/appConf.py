@@ -13,7 +13,7 @@ class Settings:
     SCREEN_WIDTH: int = pyautogui.size().width / 2
     SCREEN_HEIGHT: int = pyautogui.size().height / 2
     RESOLUTION: tuple = (SCREEN_WIDTH, SCREEN_HEIGHT)
-
+    SCORES: str = "players_score.pkl"
     FPS = 60
 
     # API_URL = "http://127.0.0.1:8000"

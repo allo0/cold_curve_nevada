@@ -1,5 +1,3 @@
-# level_selection.py
-
 import sys
 
 import pygame
@@ -14,7 +12,7 @@ logger = logConf.logger
 
 pygame.init()
 
-SCREEN = pygame.display.set_mode((1280, 720))
+SCREEN = pygame.display.set_mode((1280, 800))
 pygame.display.set_caption("Level Selection")
 
 BG = pygame.image.load(UI["background"])
@@ -33,7 +31,7 @@ def go_back_to_main_menu():
 
 def level_selection():
     username = ""
-    difficulty = 2
+    difficulty = 1
 
     # level_slider = pygame.Rect(200, 400, 880, 10)
     # slider_button = pygame.Rect(200 + (difficulty - 1) * 176, 390, 20, 30)
@@ -104,7 +102,7 @@ def level_selection():
                     logger.info(f"Game started with player {username} and difficulty {difficulty}")
 
                     cold_curve_nevada = ColdCurveNevada(player_index=sys.argv[1], multiplayer=False,
-                                                        difficulty=difficulty-1)
+                                                        difficulty=difficulty)
                     player_instance = Player(cold_curve_nevada.player_pos[0], cold_curve_nevada.player_pos[1],
                                              username, cold_curve_nevada.sound_controller, PLAYER)
                     cold_curve_nevada.add_player(player_instance=player_instance)
@@ -124,7 +122,7 @@ def level_selection():
                     logger.info(f"Game started with player {username} and difficulty {difficulty}")
 
                     cold_curve_nevada = ColdCurveNevada(player_index=sys.argv[1], multiplayer=False,
-                                                        difficulty=difficulty-1)
+                                                        difficulty=difficulty)
                     player_instance = Player(cold_curve_nevada.player_pos[0], cold_curve_nevada.player_pos[1],
                                              username, cold_curve_nevada.sound_controller, PLAYER)
                     cold_curve_nevada.add_player(player_instance=player_instance)
@@ -135,7 +133,7 @@ def level_selection():
                     logger.info(f"Game started with player {username} and difficulty {difficulty}")
 
                     cold_curve_nevada = ColdCurveNevada(player_index=sys.argv[1], multiplayer=False,
-                                                        difficulty=difficulty-1)
+                                                        difficulty=difficulty)
                     player_instance = Player(cold_curve_nevada.player_pos[0], cold_curve_nevada.player_pos[1],
                                              username, cold_curve_nevada.sound_controller, PLAYER)
                     cold_curve_nevada.add_player(player_instance=player_instance)
