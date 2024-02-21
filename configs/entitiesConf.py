@@ -11,13 +11,13 @@ GENERIC_CONFIG = {
 
 PLAYER_CONFIG = {
     "speed": 5,
-    "health": 100,
+    "health": 200,
     "level_up_heal": 0.15,
     "iframes": 240,
     "level": 1,
-    "aoe_radius": 100,
-    "aoe_attack_speed": 5,
-    "aoe_damage": 10,
+    "aoe_radius": 150,
+    "aoe_attack_speed": 10,
+    "aoe_damage": 30,
     "line_length": 110,
     "wave_frequency": 0.5
 }
@@ -25,7 +25,7 @@ PLAYER_CONFIG = {
 ENEMY_CONFIG = {
     "speed": 5,
     "health": 20,
-    "damage": 10,
+    "damage": 30,
     "exp": 10,
     "points": 10,
 
